@@ -14,7 +14,7 @@
         android:theme="@style/Theme.MikoHelper"
         tools:targetApi="31">
         <activity
-            android:name="com.example.mikohelper.MainActivity"
+            android:name="com.example.mikohelper.presentation.MainActivity"
             android:exported="true"
             android:label="@string/app_name"
             android:theme="@style/Theme.MikoHelper">

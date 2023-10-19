@@ -1,4 +1,4 @@
-package com.example.mikohelper.ui.theme
+package com.example.mikohelper.presentation.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

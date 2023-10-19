@@ -1,4 +1,4 @@
-package com.example.mikohelper.ui.theme
+package com.example.mikohelper.presentation.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

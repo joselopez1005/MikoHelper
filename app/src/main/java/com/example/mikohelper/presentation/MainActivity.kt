@@ -1,4 +1,4 @@
-package com.example.mikohelper
+package com.example.mikohelper.presentation
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -10,13 +10,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.lifecycleScope
 import com.example.mikohelper.data.local.Chat
-import com.example.mikohelper.data.local.ChatDatabase
 import com.example.mikohelper.data.local.Message
-import com.example.mikohelper.ui.theme.MikoHelperTheme
-import kotlinx.coroutines.launch
+import com.example.mikohelper.presentation.ui.theme.MikoHelperTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
