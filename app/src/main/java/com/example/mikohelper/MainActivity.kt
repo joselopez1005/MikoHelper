@@ -20,7 +20,6 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val dao = ChatDatabase.getInstance(this).chatDao
         val chat = listOf (
             Chat(recipientName =  "Miko", personality = "A helpful assistant", profilePictureRef =  1234),
             Chat(recipientName =  "Niko", personality = "A evil assistant", profilePictureRef =  1234),
@@ -31,12 +30,6 @@ class MainActivity : ComponentActivity() {
             Message( chatId = 0, content = "Hey how are you", role =  "User", sentAt = 1),
             Message( chatId = 0, content = "Hey how are you", role =  "User", sentAt = 1),
         )
-        lifecycleScope.launch {
-            chat.forEach { dao.insertChat(it) }
-            messages.forEach{dao.insertMessage(it)}
-
-
-        }
 
 
 

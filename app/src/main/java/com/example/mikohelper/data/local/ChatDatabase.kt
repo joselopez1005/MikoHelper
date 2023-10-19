@@ -14,21 +14,4 @@ import androidx.room.RoomDatabase
 )
 abstract class ChatDatabase: RoomDatabase() {
     abstract val chatDao: ChatDao
-
-    companion object {
-        @Volatile
-        private var INSTANCE: ChatDatabase? = null
-
-        fun getInstance(context: Context): ChatDatabase {
-            synchronized(this) {
-                return INSTANCE ?: Room.databaseBuilder(
-                    context.applicationContext,
-                    ChatDatabase::class.java,
-                    "chat_db"
-                ).fallbackToDestructiveMigration().build().also {
-                    INSTANCE = it
-                }
-            }
-        }
-    }
 }
