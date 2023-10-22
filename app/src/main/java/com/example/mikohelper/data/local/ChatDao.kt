@@ -20,4 +20,7 @@ interface ChatDao {
     @Query("SELECT * FROM chat WHERE chat_id = :chatId")
     suspend fun getChatWithMessages(chatId: Int): ChatWithMessages
 
+    @Query("SELECT * FROM message WHERE chat_id = :chatId ORDER BY sent_at DESC LIMIT 1")
+    suspend fun getLatestMessageFromSpecifiedChat(chatId: Int): Message
+
 }

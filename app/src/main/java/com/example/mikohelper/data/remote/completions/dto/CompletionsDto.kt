@@ -11,7 +11,7 @@ data class CompletionsDto(
 
 data class ChoicesDto(
     @SerializedName("message")
-    val message: List<MessageDto>,
+    val message: MessageDto,
     @SerializedName("finish_reason")
     val finishReason: String
 )
