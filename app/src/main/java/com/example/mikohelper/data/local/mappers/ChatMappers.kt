@@ -1,12 +1,13 @@
 package com.example.mikohelper.data.local.mappers
 
+import com.example.mikohelper.data.local.Chat
 import com.example.mikohelper.data.local.Message
 import com.example.mikohelper.data.remote.completions.dto.CompletionsDto
 import com.example.mikohelper.data.remote.completions.dto.MessageDto
+import com.example.mikohelper.domain.chat_items.ChatItem
 import com.example.mikohelper.domain.chat_items.MessageItem
 import java.time.Instant
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.ZoneOffset
 import java.util.TimeZone
 
@@ -42,5 +43,23 @@ fun Message.toMessageItem(): MessageItem {
         content = content,
         role = role,
         sentAt = LocalDateTime.ofInstant(Instant.ofEpochSecond(sentAt), TimeZone.getDefault().toZoneId())
+    )
+}
+
+fun Chat.toChatItem(): ChatItem {
+    return ChatItem(
+        chatId = chatId,
+        recipientName = recipientName,
+        personality = personality,
+        profilePictureRef = profilePictureRef
+    )
+}
+
+fun ChatItem.toChatEntity(): Chat {
+    return Chat(
+        chatId = chatId,
+        recipientName = recipientName,
+        personality = personality,
+        profilePictureRef = profilePictureRef
     )
 }
