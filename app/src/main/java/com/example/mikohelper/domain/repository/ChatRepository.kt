@@ -19,4 +19,10 @@ interface ChatRepository {
 
     // Used to show information about each chat within the home page. Latest message, time, etc.
     suspend fun getChatWithMessages(chatItem: ChatItem): Flow<Resource<ChatItemWithMessageItems>>
+
+    // Used to delete a message from a specific chat
+    suspend fun deleteMessage(messageItem: MessageItem, chatItem: ChatItem): Flow<Boolean>
+
+    // Used to delete a chat and their respective messages
+    suspend fun deleteChat(chatItem: ChatItem): Flow<Boolean>
 }

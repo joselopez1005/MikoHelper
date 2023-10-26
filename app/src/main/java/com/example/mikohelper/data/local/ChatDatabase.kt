@@ -1,8 +1,6 @@
 package com.example.mikohelper.data.local
 
-import android.content.Context
 import androidx.room.Database
-import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(
@@ -10,7 +8,7 @@ import androidx.room.RoomDatabase
         Chat::class,
         Message::class
     ],
-    version = 1
+    version = 2
 )
 abstract class ChatDatabase: RoomDatabase() {
     abstract val chatDao: ChatDao

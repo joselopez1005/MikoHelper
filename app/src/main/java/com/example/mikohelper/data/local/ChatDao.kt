@@ -26,4 +26,13 @@ interface ChatDao {
     @Query("SELECT * FROM message WHERE chat_id = :chatId ORDER BY sent_at DESC LIMIT 1")
     suspend fun getLatestMessageFromSpecifiedChat(chatId: Int): Message
 
+    @Query("DELETE FROM message WHERE message_id = :messageId")
+    suspend fun deleteMessage(messageId: Int)
+
+    @Query("DELETE FROM chat WHERE chat_id=:chatId")
+    suspend fun deleteChat(chatId: Int)
+
+    @Query("DELETE FROM message WHERE chat_id=:chatId")
+    suspend fun deleteMessagesFromSpecifiedChat(chatId: Int)
+
 }

@@ -4,7 +4,7 @@ import com.example.mikohelper.data.remote.completions.dto.MessageDto
 import com.squareup.moshi.Json
 
 data class PromptBody(
-    @Json(name = "models")
+    @Json(name = "model")
     val model: String = MODEL_NAME,
     @Json(name = "messages")
     val listOfMessages: List<MessageDto>,

@@ -25,7 +25,7 @@ class ChatRepositoryImpl @Inject constructor(
     private val db: ChatDatabase
 ) : ChatRepository {
 
-    // TODO: Handle IO errors
+    // TODO: Down the line, pass in Id's rather than entire object
     override suspend fun getAllChats() = flow {
         try {
             val listOfChats = db.chatDao.getAllChats()
@@ -73,6 +73,28 @@ class ChatRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             e.printStackTrace()
             emit(Resource.Error(e.message ?: "Unknown Error: Obtaining Chat With Messages"))
+        }
+    }
+
+    override suspend fun deleteMessage(messageItem: MessageItem, chatItem: ChatItem) = flow {
+        try {
+            val messageId = messageItem.toMessageEntity(chatItem.chatId).messageId
+            db.chatDao.deleteMessage(messageId)
+            emit(true)
+        } catch (e:Exception) {
+            e.printStackTrace()
+            emit(false)
+        }
+    }
+
+    override suspend fun deleteChat(chatItem: ChatItem) = flow {
+        try {
+            db.chatDao.deleteChat(chatItem.chatId)
+            db.chatDao.deleteMessagesFromSpecifiedChat(chatItem.chatId)
+            emit(true)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emit(false)
         }
     }
 

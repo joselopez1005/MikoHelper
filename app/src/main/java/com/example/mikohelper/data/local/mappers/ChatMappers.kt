@@ -13,7 +13,7 @@ import java.util.TimeZone
 
 fun MessageItem.toMessageEntity(chatId: Int): Message{
     return Message(
-        messageId = 0, // Auto-generated primary key
+        messageId = messageId, // Auto-generated primary key
         chatId = chatId,
         content = content,
         role = role,
@@ -40,6 +40,7 @@ fun CompletionsDto.toMessage(chatId: Int): Message {
 
 fun Message.toMessageItem(): MessageItem {
     return MessageItem(
+        messageId = messageId,
         content = content,
         role = role,
         sentAt = LocalDateTime.ofInstant(Instant.ofEpochSecond(sentAt), TimeZone.getDefault().toZoneId())
