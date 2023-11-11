@@ -19,26 +19,27 @@ class MainViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            Log.d("MainViewModel", "Init function")
-            val messageItem = MessageItem("Hi", "user", LocalDateTime.now())
-            var listOfChats: List<ChatItem>
-            chatRepository.getAllChats().collect{ result ->
-                listOfChats = result.data?: listOf()
-                Log.d("MainViewModel", "ListOfChats = ${result.data}")
-
-                chatRepository.sendUserMessageAndGetResponse(messageItem, listOfChats.first()).collect{ message ->
-                    if ( message is Resource.Success) {
-                        Log.d("MainViewModel", message.message ?: "error")
-                    }
-                }
-
-                chatRepository.getChatWithMessages(listOfChats.first()).collect {
-                    if (it is Resource.Success) {
-                        Log.d("MainViewModel", "ChatWithMessages: ${it.data}")
-                    }
+            val messageItem = MessageItem(1, "Hi", "user", LocalDateTime.now())
+            val chatItem = ChatItem(1, "Esoj", "Mad", 1234)
+//            chatRepository.createNewChat(chatItem).collect{
+//                if(it) {
+//                  Log.d("MainViewModel", "Chat was added")
+//                } else {
+//                    Log.d("MainViewModel", "Error adding chat")
+//                }
+//            }
+            chatRepository.sendUserMessageAndGetResponse(messageItem, chatItem).collect{
+                if (it is Resource.Success) {
+                    Log.d("MainViewModel", "Response: ${it.data}")
+                } else {
+                    Log.d("MainViewModel", "Error obtaining respons")
                 }
             }
+            chatRepository.deleteChat(chatItem).collect{
+                if (it) {
 
+                }
+            }
 
         }
 

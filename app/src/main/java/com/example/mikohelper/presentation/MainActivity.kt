@@ -10,6 +10,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.mikohelper.data.local.Chat
 import com.example.mikohelper.data.local.Message
 import com.example.mikohelper.presentation.ui.theme.MikoHelperTheme
@@ -19,6 +20,8 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+
         val chat = listOf (
             Chat(recipientName =  "Miko", personality = "A helpful assistant", profilePictureRef =  1234),
             Chat(recipientName =  "Niko", personality = "A evil assistant", profilePictureRef =  1234),
@@ -39,6 +42,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    val viewModel: MainViewModel = hiltViewModel()
                     Greeting("Android")
                 }
             }

@@ -7,4 +7,11 @@ data class MessageItem(
     val content: String,
     val role: String,
     val sentAt: LocalDateTime
-)
+) {
+    companion object {
+        const val USER = "USER"
+        const val SYSTEM = "SYSTEM"
+        const val ASSISTANT = "ASSISTANT"
+    }
+}
+

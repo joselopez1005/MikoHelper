@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Miko Helper</string>
+    <string name="send">send</string>
+    <string name="textfield_hint">Send Message</string>
 </resources>
