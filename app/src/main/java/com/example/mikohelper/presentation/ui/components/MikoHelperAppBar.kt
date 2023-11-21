@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.TopAppBar
@@ -29,7 +30,8 @@ fun MikoHelperAppBar(
 ) {
     TopAppBar(
         title = title,
-        modifier = modifier,
+        modifier = modifier
+            .padding(16.dp),
         actions = actions,
         scrollBehavior = scrollBehavior,
         navigationIcon = {
@@ -38,7 +40,7 @@ fun MikoHelperAppBar(
                 contentDescription = null,
                 modifier = Modifier
                     .clickable { onNavIconPressed.invoke() }
-                    .padding(start = 8.dp)
+                    .padding(0.dp)
             )
         }
     )
@@ -48,8 +50,12 @@ fun MikoHelperAppBar(
 @Composable
 fun MikoHelperAppBarPreview() {
     MikoHelperTheme {
-        MikoHelperAppBar(title = { ProfileCard(recipientName = "Jose", recipientPicture = R.drawable.ic_profile_akeshi) }) {
-        }
+        MikoHelperAppBar(
+            title = { ProfileCard(recipientName = "Jose", recipientPicture = R.drawable.ic_profile_akeshi) },
+            actions = {Icon(
+                imageVector = Icons.Outlined.Search,
+                contentDescription = null) },
+        )
     }
 }
 
