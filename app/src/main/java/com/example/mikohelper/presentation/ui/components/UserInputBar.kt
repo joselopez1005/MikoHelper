@@ -1,3 +1,4 @@
+
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,12 +32,16 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.miko.R
+import com.example.mikohelper.domain.chat_items.ChatItem
+import com.example.mikohelper.presentation.ui.chat_screen.ChatScreenEvent
 import com.example.mikohelper.presentation.ui.theme.MikoHelperTheme
 
 @Composable
 fun UserInputBar(
-    modifier: Modifier = Modifier,
-    resetScroll: () -> Unit
+    chatItem: ChatItem,
+    resetScroll: () -> Unit,
+    sendButtonAction: (ChatScreenEvent) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     var isKeyboardOpen by rememberSaveable { mutableStateOf(false) }
     if (isKeyboardOpen) {
@@ -53,10 +58,11 @@ fun UserInputBar(
 
     Surface(
         tonalElevation = 2.dp,
-        contentColor = MaterialTheme.colorScheme.secondary
+        contentColor = MaterialTheme.colorScheme.secondary,
+        modifier = modifier
     ) {
         Row(
-            modifier = modifier.padding(8.dp),
+            modifier = Modifier.padding(8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -76,7 +82,16 @@ fun UserInputBar(
             // Send button
             Button(
                 modifier = Modifier.height(36.dp),
-                onClick = {}
+                onClick = {
+                    sendButtonAction.invoke(
+                        ChatScreenEvent.OnUserSendMessage(
+                            message = textState.text,
+                            chatItem = chatItem
+                        )
+                    )
+                    resetScroll.invoke()
+                    textState = TextFieldValue()
+                }
             ) {
                 Text(
                     stringResource(id = R.string.send),
@@ -104,7 +119,7 @@ private fun UserInputTextBar(
             modifier = Modifier
                 .height(32.dp)
                 .onFocusChanged { state ->
-                    onTextFieldFocused(state.isFocused);
+                    onTextFieldFocused(state.isFocused)
                 }
                 .align(Alignment.CenterStart),
             keyboardOptions = KeyboardOptions(
@@ -133,9 +148,10 @@ private fun UserInputTextBar(
 fun UserInputBarPreview() {
     MikoHelperTheme {
         UserInputBar(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-
-        }
+            chatItem = ChatItem(0, "Miko", "Nice", 0),
+            modifier = Modifier.fillMaxWidth(),
+            sendButtonAction = {},
+            resetScroll = {}
+        )
     }
 }

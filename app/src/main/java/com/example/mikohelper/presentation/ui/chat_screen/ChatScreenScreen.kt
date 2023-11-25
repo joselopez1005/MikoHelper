@@ -3,6 +3,7 @@ package com.example.mikohelper.presentation.ui.chat_screen
 import UserInputBar
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
@@ -25,6 +27,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,16 +38,33 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.miko.R
 import com.example.mikohelper.domain.chat_items.MessageItem
 import com.example.mikohelper.presentation.ui.components.MikoHelperAppBar
 import com.example.mikohelper.presentation.ui.components.ProfileCard
 import com.example.mikohelper.presentation.ui.theme.MikoHelperTheme
+import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChatScreen() {
+fun ChatScreen(
+    viewModel: ChatScreenViewModel = hiltViewModel()
+) {
+    ChatScreenContent(
+        viewModel.state,
+        viewModel::onEvent
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@Composable
+fun ChatScreenContent(
+    state: State<ChatScreenStates>,
+    onButtonPressed: (ChatScreenEvent) -> Unit
+) {
+    val scrollState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
     Scaffold(
         topBar = {
             MikoHelperAppBar(
@@ -58,47 +81,58 @@ fun ChatScreen() {
             .contentWindowInsets
             .exclude(WindowInsets.navigationBars)
             .exclude(WindowInsets.ime)
+
     ) { paddingValues ->
         Column(
             Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
+
             MessagesSection(
-                listOfMessages = listOf(
-                    MessageItem(0, "Hi, this is a user test message", "${MessageItem.USER}", LocalDateTime.now()),
-                    MessageItem(0, "Hi, this is an assistant response message", "${MessageItem.ASSISTANT}", LocalDateTime.now()),
-                ),
-                modifier = Modifier.weight(1f).padding(horizontal = 16.dp)
+                state = state,
+                scrollState = scrollState,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(bottom = 16.dp, start = 8.dp, end = 8.dp)
             )
             UserInputBar(
-                resetScroll = { },
-                modifier = Modifier.navigationBarsPadding().imePadding()
+                chatItem = state.value.chatItem,
+                resetScroll = {
+                    scope.launch {
+                        scrollState.scrollToItem(0)
+                    }
+                },
+                sendButtonAction = onButtonPressed,
+                modifier = Modifier
+                    .navigationBarsPadding()
+                    .imePadding()
             )
         }
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun MessagesSection(
-    listOfMessages: List<MessageItem>,
-    modifier: Modifier = Modifier
+    state: State<ChatScreenStates>,
+    scrollState: LazyListState,
+    modifier: Modifier = Modifier,
 ) {
-    val listState = rememberLazyListState()
-
+    val listOfMessages = state.value.listOfMessages.reversed()
     LazyColumn(
-        state = listState,
-        modifier = modifier.fillMaxSize()
+        state = scrollState,
+        modifier = modifier,
+        reverseLayout = true
     ) {
-        for (index in listOfMessages.indices) {
-            item {
-                MessageBubble(
-                    messageItem = listOfMessages[index],
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-            }
+        items(state.value.listOfMessages.size) {
+            MessageBubble(
+                messageItem = listOfMessages[it],
+                modifier = Modifier.padding(top = 8.dp)
+            )
         }
     }
+
 
 }
 
@@ -121,8 +155,9 @@ fun MessageBubble(
         messageAlignment = Alignment.TopStart
     }
 
-    Box(modifier = modifier
-        .fillMaxWidth()
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
     ) {
         Column(modifier = Modifier.align(messageAlignment)) {
             Surface(
@@ -159,7 +194,13 @@ fun ClickableMessage(
 @Composable
 fun ChatScreenPreview() {
     MikoHelperTheme {
-        ChatScreen()
+        val state = remember {
+            mutableStateOf(ChatScreenStates())
+        }
+        ChatScreenContent(
+            state = state,
+            onButtonPressed = {}
+        )
     }
 }
 
@@ -171,7 +212,7 @@ fun MessageBubbleUserPreview() {
             messageItem = MessageItem(
                 0,
                 "Hello, how are you?",
-                "USER",
+                "user",
                 LocalDateTime.now()
             )
         )
@@ -186,7 +227,7 @@ fun MessageBubbleUserPreviewDark() {
             messageItem = MessageItem(
                 0,
                 "Hello, how are you?",
-                "USER",
+                "user",
                 LocalDateTime.now()
             )
         )
@@ -201,7 +242,7 @@ fun MessageBubbleAssistantPreview() {
             messageItem = MessageItem(
                 0,
                 "Hello, how are you?",
-                "ASSISTANT",
+                "assistant",
                 LocalDateTime.now()
             )
         )
@@ -216,7 +257,7 @@ fun MessageBubbleUserAssistantDark() {
             messageItem = MessageItem(
                 0,
                 "Hello, how are you?",
-                "ASSISTANT",
+                "assistant",
                 LocalDateTime.now()
             )
         )
