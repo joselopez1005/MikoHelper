@@ -1,5 +1,6 @@
 package com.example.mikohelper.data.repository
 
+import android.util.Log
 import com.example.mikohelper.data.local.ChatDatabase
 import com.example.mikohelper.data.local.mappers.toChatEntity
 import com.example.mikohelper.data.local.mappers.toChatItem
@@ -15,7 +16,6 @@ import com.example.mikohelper.domain.chat_items.MessageItem
 import com.example.mikohelper.domain.repository.ChatRepository
 import com.example.mikohelper.domain.util.Resource
 import kotlinx.coroutines.flow.flow
-import java.lang.Exception
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -100,6 +100,7 @@ class ChatRepositoryImpl @Inject constructor(
 
     private suspend fun generatePromptBody(chatItem: ChatItem): PromptBody {
         val chatWithMessages = db.chatDao.getChatWithMessages(chatItem.chatId)
+        Log.d("ChatRepositoryImpl", "chatWithMessages size: ${chatWithMessages.messages}")
         return PromptBody(
             listOfMessages = chatWithMessages.messages.map { it.toMessageDto() },
         )
