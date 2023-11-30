@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.WindowCompat
-import com.example.mikohelper.presentation.ui.chat_screen.ChatScreen
+import com.example.mikohelper.presentation.ui.home_screen.HomeScreen
 import com.example.mikohelper.presentation.ui.theme.MikoHelperTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -24,7 +24,7 @@ class MainActivity : ComponentActivity() {
                 consumeWindowInsets = false
                 setContent {
                     MikoHelperTheme {
-                        ChatScreen()
+                        HomeScreen()
                     }
                 }
             }

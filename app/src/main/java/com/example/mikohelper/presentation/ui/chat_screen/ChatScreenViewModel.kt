@@ -31,6 +31,8 @@ class ChatScreenViewModel @Inject constructor(
             is ChatScreenEvent.OnUserSendMessage -> {
                 onUserSendMessage(event.message, event.chatItem)
             }
+
+            else -> {}
         }
     }
 

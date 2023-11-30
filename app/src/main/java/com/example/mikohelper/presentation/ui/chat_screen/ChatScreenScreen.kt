@@ -125,7 +125,7 @@ fun MessagesSection(
         modifier = modifier,
         reverseLayout = true
     ) {
-        items(state.value.listOfMessages.size) {
+        items(listOfMessages.size) {
             MessageBubble(
                 messageItem = listOfMessages[it],
                 modifier = Modifier.padding(top = 8.dp)

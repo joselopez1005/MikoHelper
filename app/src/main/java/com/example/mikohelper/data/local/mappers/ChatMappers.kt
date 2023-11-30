@@ -9,9 +9,11 @@ import com.example.mikohelper.domain.chat_items.MessageItem
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import java.util.TimeZone
 
 fun MessageItem.toMessageEntity(chatId: Int): Message{
+
     return Message(
         messageId = messageId, // Auto-generated primary key
         chatId = chatId,
