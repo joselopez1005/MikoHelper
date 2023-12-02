@@ -1,14 +1,18 @@
 package com.example.mikohelper.presentation.ui.home_screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
@@ -21,6 +25,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.example.miko.R
+import com.example.mikohelper.domain.chat_items.ChatItem
 import com.example.mikohelper.presentation.ui.components.MikoHelperAppBarNoNavigation
 import com.example.mikohelper.presentation.ui.components.ProfileCardWithLatestMessage
 import com.example.mikohelper.presentation.ui.theme.MikoHelperTheme
@@ -55,6 +61,14 @@ fun HomeScreenContent(
                 }
             )
         },
+        floatingActionButton = {
+            FloatingActionButton(onClick = {
+                val chatItem = ChatItem(0, "Jose", "Nice", R.drawable.ic_profile_akeshi)
+                onEvent.invoke(HomeScreenEvent.OnCreateChat(chatItem))
+            }) {
+                Icon(imageVector = Icons.Default.Add, contentDescription = null)
+            }
+        },
         contentWindowInsets = ScaffoldDefaults
             .contentWindowInsets
 
@@ -63,6 +77,7 @@ fun HomeScreenContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .background(MaterialTheme.colorScheme.surface)
         ) {
             ListOfChatsSection(
                 navController = navController,

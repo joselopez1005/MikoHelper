@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.miko.R
@@ -52,13 +53,16 @@ fun ProfileCardWithLatestMessage(
     chatWithMessages: ChatItemWithMessageItems,
     modifier: Modifier = Modifier
 ) {
+    val latestMessage = if (chatWithMessages.messageItem.isEmpty()) { "" } else chatWithMessages.messageItem.last().content
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier.fillMaxWidth()
             .padding(8.dp)
     ) {
-        Row {
+        Row (
+            modifier = Modifier.weight(1f)
+        ) {
             ProfileIcon(
                 recipientPicture = chatWithMessages.chatItem.profilePictureRef
             )
@@ -68,19 +72,25 @@ fun ProfileCardWithLatestMessage(
             ) {
                 Text(
                     text = chatWithMessages.chatItem.recipientName,
-                    style = MaterialTheme.typography.headlineSmall
+                    style = MaterialTheme.typography.headlineSmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = chatWithMessages.messageItem.last().content,
-                    style = MaterialTheme.typography.bodySmall
+                    text = latestMessage,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
 
             }
         }
-        Text(
-            text = convertLocalDateTimeToLocalTime(chatWithMessages.messageItem.last().sentAt),
-            style = MaterialTheme.typography.bodySmall
-        )
+        if (latestMessage.isNotBlank()) {
+            Text(
+                text = convertLocalDateTimeToLocalTime(chatWithMessages.messageItem.last().sentAt),
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
     }
 }
 

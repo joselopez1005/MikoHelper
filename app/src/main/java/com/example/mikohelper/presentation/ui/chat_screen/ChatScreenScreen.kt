@@ -39,7 +39,6 @@ import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.miko.R
 import com.example.mikohelper.domain.chat_items.MessageItem
 import com.example.mikohelper.presentation.ui.components.MikoHelperAppBar
 import com.example.mikohelper.presentation.ui.components.ProfileCard
@@ -72,8 +71,8 @@ fun ChatScreenContent(
             MikoHelperAppBar(
                 title = {
                     ProfileCard(
-                        recipientName = "Miko",
-                        recipientPicture = R.drawable.ic_profile_akeshi
+                        recipientName = state.value.chatItem.recipientName,
+                        recipientPicture = state.value.chatItem.profilePictureRef
                     )
                 },
                 actions = { Icon(imageVector = Icons.Outlined.Search, contentDescription = null) },
