@@ -24,6 +24,14 @@ class HomeScreenViewModel @Inject constructor(
         getChatWithMessages()
     }
 
+    fun onEvent(event: HomeScreenEvent) {
+        when(event) {
+            is HomeScreenEvent.OnChatSelected -> {
+                event.navigate.invoke()
+            }
+        }
+    }
+
     private fun getChatWithMessages() {
         viewModelScope.launch {
             repository.getAllChats().collect { result ->

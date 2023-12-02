@@ -1,5 +1,6 @@
 package com.example.mikohelper.presentation.ui.home_screen
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -18,23 +19,28 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.miko.R
-import com.example.mikohelper.domain.chat_items.ChatItem
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.mikohelper.presentation.ui.components.MikoHelperAppBarNoNavigation
 import com.example.mikohelper.presentation.ui.components.ProfileCardWithLatestMessage
 import com.example.mikohelper.presentation.ui.theme.MikoHelperTheme
 
 @Composable
 fun HomeScreen(
+    navController: NavController,
     viewModel: HomeScreenViewModel = hiltViewModel()
 ) {
     HomeScreenContent(
+        navController,
+        viewModel::onEvent,
         viewModel.state
     )
 }
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreenContent(
+    navController: NavController,
+    onEvent: (HomeScreenEvent) -> Unit,
     state: State<HomeScreenStates>
 ) {
     Scaffold(
@@ -58,13 +64,19 @@ fun HomeScreenContent(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            ListOfChatsSection(state = state)
+            ListOfChatsSection(
+                navController = navController,
+                onEvent = onEvent,
+                state = state
+            )
         }
     }
 }
 
 @Composable
 fun ListOfChatsSection(
+    navController: NavController,
+    onEvent: (HomeScreenEvent) -> Unit,
     state: State<HomeScreenStates>,
     modifier: Modifier = Modifier
 ) {
@@ -72,33 +84,26 @@ fun ListOfChatsSection(
         modifier = modifier.fillMaxSize()
     ) {
         items(state.value.listOfChats.size) {
-            ProfileCardWithLatestMessage(chatWithMessages = state.value.listOfChats[it])
+            ProfileCardWithLatestMessage(
+                chatWithMessages = state.value.listOfChats[it],
+                modifier = Modifier.clickable {
+                    onEvent.invoke(HomeScreenEvent.OnChatSelected{
+                        navController.navigate("chatscreen")
+                    })
+                }
+            )
         }
     }
 }
 
-@Composable
-fun ChatListItem(
-    chatItem: ChatItem,
-    modifier: Modifier = Modifier
-) {
-
-}
-
-@Preview
-@Composable
-fun ChatItemPreview() {
-    MikoHelperTheme {
-        ChatListItem(chatItem = ChatItem(1, "Miko", "Humble", R.drawable.ic_profile_akeshi))
-    }
-}
 @Preview
 @Composable
 fun HomeScreenContentPreview() {
     val state = remember{
         mutableStateOf(HomeScreenStates())
     }
+    val navController = rememberNavController()
     MikoHelperTheme {
-        HomeScreenContent(state)
+        HomeScreenContent(navController,{},state)
     }
 }
