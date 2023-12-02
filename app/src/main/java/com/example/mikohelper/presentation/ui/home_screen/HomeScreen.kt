@@ -87,8 +87,9 @@ fun ListOfChatsSection(
             ProfileCardWithLatestMessage(
                 chatWithMessages = state.value.listOfChats[it],
                 modifier = Modifier.clickable {
+                    val selectedChatItemId = state.value.listOfChats[it].chatItem.chatId
                     onEvent.invoke(HomeScreenEvent.OnChatSelected{
-                        navController.navigate("chatscreen")
+                        navController.navigate("chatscreen/$selectedChatItemId")
                     })
                 }
             )

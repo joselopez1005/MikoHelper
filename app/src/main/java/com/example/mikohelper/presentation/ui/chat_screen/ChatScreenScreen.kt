@@ -49,8 +49,10 @@ import java.time.LocalDateTime
 
 @Composable
 fun ChatScreen(
+    chatItemId: Int,
     viewModel: ChatScreenViewModel = hiltViewModel()
 ) {
+    viewModel.onEvent(ChatScreenEvent.GetChatMessages(chatItemId))
     ChatScreenContent(
         viewModel.state,
         viewModel::onEvent

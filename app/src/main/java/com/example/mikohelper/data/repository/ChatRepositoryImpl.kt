@@ -98,6 +98,16 @@ class ChatRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun getChatInformation(chatId: Int) = flow {
+        try {
+            val chat = db.chatDao.getChatInformation(chatId)
+            emit(Resource.Success(chat.toChatItem()))
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emit(Resource.Error(e.message ?: "Unknown Error: obtaining chat information"))
+        }
+    }
+
     private suspend fun generatePromptBody(chatItem: ChatItem): PromptBody {
         val chatWithMessages = db.chatDao.getChatWithMessages(chatItem.chatId)
         Log.d("ChatRepositoryImpl", "chatWithMessages size: ${chatWithMessages.messages}")
