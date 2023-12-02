@@ -35,4 +35,7 @@ interface ChatDao {
     @Query("DELETE FROM message WHERE chat_id=:chatId")
     suspend fun deleteMessagesFromSpecifiedChat(chatId: Int)
 
+    @Query("SELECT * FROM chat where chat_id=:chatId")
+    suspend fun getChatInformation(chatId: Int): Chat
+
 }

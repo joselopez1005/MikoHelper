@@ -21,15 +21,29 @@ class HomeScreenViewModel @Inject constructor(
     val state: State<HomeScreenStates> = _state
 
     init {
-        getChatWithMessages()
+        getAllChatsWithMessages()
     }
 
-    private fun getChatWithMessages() {
+    fun onEvent(event: HomeScreenEvent) {
+        when(event) {
+            is HomeScreenEvent.OnChatSelected -> {
+                event.navigate.invoke()
+            }
+            is HomeScreenEvent.OnCreateChat -> {
+                createNewChat(event.chatItem).invokeOnCompletion { getAllChatsWithMessages() }
+            }
+        }
+    }
+
+    private fun getAllChatsWithMessages() {
+        // Need to reset list to account for obtaining all chats again with their messages
+        _state.value = _state.value.copy(listOfChats = mutableListOf())
+
         viewModelScope.launch {
             repository.getAllChats().collect { result ->
                 if (result is Success) {
                     result.data?.forEach{
-                        getChatWithMessages(it)
+                        getAllChatsWithMessages(it)
                     }
                 } else {
                     _state.value = _state.value.copy(error = result.message)
@@ -38,7 +52,7 @@ class HomeScreenViewModel @Inject constructor(
         }
     }
 
-    private fun getChatWithMessages(chatItem: ChatItem) {
+    private fun getAllChatsWithMessages(chatItem: ChatItem) = run {
         viewModelScope.launch {
             repository.getChatWithMessages(chatItem).collect { result ->
                 if (result is Success) {
@@ -49,6 +63,16 @@ class HomeScreenViewModel @Inject constructor(
                 }
                 if (result is Error) {
                     _state.value = _state.value.copy(error = result.message)
+                }
+            }
+        }
+    }
+
+    private fun createNewChat(chatItem: ChatItem) = run {
+        viewModelScope.launch {
+            repository.createNewChat(chatItem).collect { result ->
+                if (!result) {
+                    _state.value = _state.value.copy(error = "Error adding chat")
                 }
             }
         }

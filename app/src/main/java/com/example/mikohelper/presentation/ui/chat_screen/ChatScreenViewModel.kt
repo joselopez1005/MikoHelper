@@ -9,7 +9,8 @@ import com.example.miko.R
 import com.example.mikohelper.domain.chat_items.ChatItem
 import com.example.mikohelper.domain.chat_items.MessageItem
 import com.example.mikohelper.domain.repository.ChatRepository
-import com.example.mikohelper.domain.util.Resource
+import com.example.mikohelper.domain.util.Resource.Error
+import com.example.mikohelper.domain.util.Resource.Success
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
@@ -31,8 +32,10 @@ class ChatScreenViewModel @Inject constructor(
             is ChatScreenEvent.OnUserSendMessage -> {
                 onUserSendMessage(event.message, event.chatItem)
             }
+            is ChatScreenEvent.GetChatMessages -> {
+                getChatInformation(event.chatItemId).invokeOnCompletion { getChatWithMessages() }
+            }
 
-            else -> {}
         }
     }
 
@@ -48,7 +51,7 @@ class ChatScreenViewModel @Inject constructor(
                 messageItem = messageItem,
                 chatItem = chat
             ).collect { result ->
-                if (result is Resource.Success) {
+                if (result is Success) {
                     addMessage(result.data!!)
                 } else {
                     _state.value = _state.value.copy(error = result.message)
@@ -66,10 +69,23 @@ class ChatScreenViewModel @Inject constructor(
     private fun getChatWithMessages() = run {
         viewModelScope.launch {
             repository.getChatWithMessages(_state.value.chatItem).collect { result ->
-                _state.value = if (result is Resource.Success) {
+                _state.value = if (result is Success) {
                     _state.value.copy(listOfMessages = result.data!!.messageItem.toMutableList())
                 } else {
                     _state.value.copy(error = result.message)
+                }
+            }
+        }
+    }
+
+    private fun getChatInformation(chatId: Int) = run {
+        viewModelScope.launch {
+            repository.getChatInformation(chatId).collect { result ->
+                if (result is Success) {
+                    _state.value = _state.value.copy(chatItem = result.data!!)
+                }
+                if (result is Error) {
+                    _state.value = _state.value.copy(error = result.message)
                 }
             }
         }
