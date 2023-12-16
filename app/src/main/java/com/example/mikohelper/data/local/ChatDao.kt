@@ -38,4 +38,7 @@ interface ChatDao {
     @Query("SELECT * FROM chat where chat_id=:chatId")
     suspend fun getChatInformation(chatId: Int): Chat
 
+    @Query("SELECT * FROM chat ORDER BY chat_id DESC LIMIT 1")
+    suspend fun getLatestChatCreated(): Chat
+
 }

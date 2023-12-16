@@ -38,9 +38,10 @@ class ChatRepositoryImpl @Inject constructor(
     override suspend fun createNewChat(chatItem: ChatItem) = flow {
         try {
             db.chatDao.insertChat(chatItem.toChatEntity())
-            emit(true)
+            val latestChat = db.chatDao.getLatestChatCreated()
+            emit(Resource.Success(latestChat.toChatItem()))
         } catch (e: Exception) {
-            emit(false)
+            emit(Resource.Error(e.message ?: "Unknown Error: Failed to create new chat"))
         }
     }
 
