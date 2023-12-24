@@ -41,4 +41,8 @@ interface ChatDao {
     @Query("SELECT * FROM chat ORDER BY chat_id DESC LIMIT 1")
     suspend fun getLatestChatCreated(): Chat
 
+    @Query("SELECT * FROM message WHERE role = :role AND chat_id = :chatId ORDER BY sent_at DESC LIMIT 1 ")
+    suspend fun getLatestPersonality(role: String, chatId: Int): Message
+
+
 }

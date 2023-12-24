@@ -26,6 +26,11 @@ interface ChatRepository {
     // Used to delete a chat and their respective messages
     suspend fun deleteChat(chatItem: ChatItem): Flow<Boolean>
 
-    //Used to obtain chat information
+    // Used to obtain chat information
     suspend fun getChatInformation(chatId: Int): Flow<Resource<ChatItem>>
+
+    // When a chat is re-entered or created, we need to set up the personality.
+    // This is due to the clearing of messages every day
+    suspend fun setPersonality(chatItem: ChatItem): Flow<Resource<MessageItem>>
+
 }

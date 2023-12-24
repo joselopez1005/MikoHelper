@@ -12,14 +12,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.miko.R
-import com.example.mikohelper.domain.chat_items.ChatItem
 import com.example.mikohelper.domain.util.NavigationUtil.Directions.CHAT_SCREEN
 import com.example.mikohelper.presentation.ui.components.MikoHelperAppBar
 import com.example.mikohelper.presentation.ui.components.ProfilePersonalityCard
@@ -32,6 +33,7 @@ fun NewChatScreen(
 ) {
     NewChatScreenContent(
         navController,
+        viewModel.state,
         viewModel::onEvent
     )
 }
@@ -40,6 +42,7 @@ fun NewChatScreen(
 @Composable
 fun NewChatScreenContent(
     navController: NavController,
+    states: State<NewChatStates>,
     onEvent: (NewChatEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -70,7 +73,7 @@ fun NewChatScreenContent(
                     personality = "mean",
                     modifier = Modifier.clickable {
                         onEvent(NewChatEvent.OnCreateChat(
-                            selectedChat = ChatItem(0, "Morgana", "Motivated", R.drawable.ic_profile_akeshi),
+                            selectedChat = states.value.listOfCharacters.first(),
                             navigate = {chatId ->
                                 navController.navigate("$CHAT_SCREEN/$chatId")
                             }
@@ -88,6 +91,9 @@ fun NewChatScreenContent(
 fun NewChatScreenContentPreview() {
     MikoHelperTheme {
         val navController = rememberNavController()
-        NewChatScreenContent(navController = navController, {})
+        val state = remember {
+            mutableStateOf(NewChatStates())
+        }
+        NewChatScreenContent(navController = navController, states = state, {})
     }
 }

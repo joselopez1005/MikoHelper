@@ -1,11 +1,9 @@
 package com.example.mikohelper.presentation.ui.chat_screen
 
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.miko.R
 import com.example.mikohelper.domain.chat_items.ChatItem
 import com.example.mikohelper.domain.chat_items.MessageItem
 import com.example.mikohelper.domain.repository.ChatRepository
@@ -22,10 +20,6 @@ class ChatScreenViewModel @Inject constructor(
 ): ViewModel() {
     private val _state = mutableStateOf(ChatScreenStates())
     val state: State<ChatScreenStates> = _state
-
-    init {
-        getChatWithMessages()
-    }
 
     fun onEvent(event: ChatScreenEvent) {
         when (event) {
@@ -91,12 +85,4 @@ class ChatScreenViewModel @Inject constructor(
         }
     }
 
-    //TODO: Remove this when implementing home screen
-    private fun createChat() = run {
-        viewModelScope.launch {
-            repository.createNewChat(ChatItem(0, "Miko", "Helpful assistant", R.drawable.ic_profile_akeshi)).collect {
-                Log.d("Creating chat: ", it.toString())
-            }
-        }
-    }
 }
