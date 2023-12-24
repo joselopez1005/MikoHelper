@@ -32,6 +32,9 @@ class HomeScreenViewModel @Inject constructor(
             is HomeScreenEvent.OnCreateChat -> {
                 createNewChat(event.chatItem).invokeOnCompletion { getAllChatsWithMessages() }
             }
+            is HomeScreenEvent.OnCreateNewChat -> {
+                event.navigate.invoke()
+            }
         }
     }
 
@@ -71,8 +74,11 @@ class HomeScreenViewModel @Inject constructor(
     private fun createNewChat(chatItem: ChatItem) = run {
         viewModelScope.launch {
             repository.createNewChat(chatItem).collect { result ->
-                if (!result) {
-                    _state.value = _state.value.copy(error = "Error adding chat")
+                if (result is Success) {
+                    _state.value = _state.value.copy(createdChat = result.data!!)
+                }
+                if (result is Error) {
+                    _state.value = _state.value.copy(error = result.message)
                 }
             }
         }

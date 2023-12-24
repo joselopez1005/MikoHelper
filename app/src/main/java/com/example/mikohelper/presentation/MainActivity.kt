@@ -17,8 +17,10 @@ import androidx.navigation.navArgument
 import com.example.mikohelper.domain.util.NavigationUtil.Directions.ARG_CHAT_ITEM_ID
 import com.example.mikohelper.domain.util.NavigationUtil.Directions.CHAT_SCREEN
 import com.example.mikohelper.domain.util.NavigationUtil.Directions.HOME_SCREEN
+import com.example.mikohelper.domain.util.NavigationUtil.Directions.NEW_CHAT_SCREEN
 import com.example.mikohelper.presentation.ui.chat_screen.ChatScreen
 import com.example.mikohelper.presentation.ui.home_screen.HomeScreen
+import com.example.mikohelper.presentation.ui.new_chat_screen.NewChatScreen
 import com.example.mikohelper.presentation.ui.theme.MikoHelperTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -36,6 +38,7 @@ class MainActivity : ComponentActivity() {
                         val navController = rememberNavController()
                         NavHost(navController = navController, startDestination = HOME_SCREEN) {
                             composable(HOME_SCREEN) { HomeScreen(navController) }
+                            composable(NEW_CHAT_SCREEN) { NewChatScreen(navController) }
                             composable(
                                 route = "$CHAT_SCREEN/{$ARG_CHAT_ITEM_ID}",
                                 arguments = listOf(navArgument(ARG_CHAT_ITEM_ID) {type = NavType.IntType})

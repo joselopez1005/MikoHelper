@@ -16,6 +16,7 @@ import com.example.mikohelper.domain.chat_items.MessageItem
 import com.example.mikohelper.domain.repository.ChatRepository
 import com.example.mikohelper.domain.util.Resource
 import kotlinx.coroutines.flow.flow
+import java.time.LocalDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -38,9 +39,11 @@ class ChatRepositoryImpl @Inject constructor(
     override suspend fun createNewChat(chatItem: ChatItem) = flow {
         try {
             db.chatDao.insertChat(chatItem.toChatEntity())
-            emit(true)
+            val createdChat = db.chatDao.getLatestChatCreated()
+            setPersonality(createdChat.toChatItem()).collect {}
+            emit(Resource.Success(createdChat.toChatItem()))
         } catch (e: Exception) {
-            emit(false)
+            emit(Resource.Error(e.message ?: "Unknown Error: Failed to create new chat"))
         }
     }
 
@@ -50,6 +53,7 @@ class ChatRepositoryImpl @Inject constructor(
     ) = flow {
         try {
             db.chatDao.insertMessage(messageItem.toMessageEntity(chatItem.chatId))
+            kotlinx.coroutines.delay(1000)
             val promptBody = generatePromptBody(chatItem)
             val completionsDto = openApi.getChatMessageResponse(requestBody = promptBody)
 
@@ -105,6 +109,27 @@ class ChatRepositoryImpl @Inject constructor(
         } catch (e: Exception) {
             e.printStackTrace()
             emit(Resource.Error(e.message ?: "Unknown Error: obtaining chat information"))
+        }
+    }
+
+    override suspend fun setPersonality(chatItem: ChatItem) = flow {
+        try {
+            val personalityMessageItem = MessageItem(
+                content = chatItem.personality,
+                role = MessageItem.SYSTEM,
+                sentAt = LocalDateTime.now()
+            )
+            sendUserMessageAndGetResponse(personalityMessageItem, chatItem).collect { response ->
+                if (response is Resource.Success) {
+                    emit(Resource.Success(response.data!!))
+                }
+                if (response is Resource.Error) {
+                    emit(Resource.Error(response.message ?: "Unknown Error: setting chat personality"))
+                }
+             }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emit(Resource.Error(e.message ?: "Unknown Error: setting chat personality"))
         }
     }
 

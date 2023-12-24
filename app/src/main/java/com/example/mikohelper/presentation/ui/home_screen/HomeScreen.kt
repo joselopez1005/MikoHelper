@@ -25,8 +25,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
-import com.example.miko.R
-import com.example.mikohelper.domain.chat_items.ChatItem
+import com.example.mikohelper.domain.util.NavigationUtil.Directions.CHAT_SCREEN
+import com.example.mikohelper.domain.util.NavigationUtil.Directions.NEW_CHAT_SCREEN
 import com.example.mikohelper.presentation.ui.components.MikoHelperAppBarNoNavigation
 import com.example.mikohelper.presentation.ui.components.ProfileCardWithLatestMessage
 import com.example.mikohelper.presentation.ui.theme.MikoHelperTheme
@@ -63,8 +63,9 @@ fun HomeScreenContent(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = {
-                val chatItem = ChatItem(0, "Jose", "Nice", R.drawable.ic_profile_akeshi)
-                onEvent.invoke(HomeScreenEvent.OnCreateChat(chatItem))
+                onEvent.invoke(HomeScreenEvent.OnCreateNewChat {
+                    navController.navigate(NEW_CHAT_SCREEN)
+                })
             }) {
                 Icon(imageVector = Icons.Default.Add, contentDescription = null)
             }
@@ -104,7 +105,7 @@ fun ListOfChatsSection(
                 modifier = Modifier.clickable {
                     val selectedChatItemId = state.value.listOfChats[it].chatItem.chatId
                     onEvent.invoke(HomeScreenEvent.OnChatSelected{
-                        navController.navigate("chatscreen/$selectedChatItemId")
+                        navController.navigate("$CHAT_SCREEN/$selectedChatItemId")
                     })
                 }
             )

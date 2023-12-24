@@ -12,7 +12,7 @@ interface ChatRepository {
     suspend fun getAllChats(): Flow<Resource<List<ChatItem>>>
 
     // Creates new chat when user creates a new chat with a personality
-    suspend fun createNewChat(chatItem: ChatItem): Flow<Boolean>
+    suspend fun createNewChat(chatItem: ChatItem): Flow<Resource<ChatItem>>
 
     // Used to send message to ChatGPT and receive it's response
     suspend fun sendUserMessageAndGetResponse(messageItem: MessageItem, chatItem: ChatItem): Flow<Resource<MessageItem>>
@@ -26,6 +26,11 @@ interface ChatRepository {
     // Used to delete a chat and their respective messages
     suspend fun deleteChat(chatItem: ChatItem): Flow<Boolean>
 
-    //Used to obtain chat information
+    // Used to obtain chat information
     suspend fun getChatInformation(chatId: Int): Flow<Resource<ChatItem>>
+
+    // When a chat is re-entered or created, we need to set up the personality.
+    // This is due to the clearing of messages every day
+    suspend fun setPersonality(chatItem: ChatItem): Flow<Resource<MessageItem>>
+
 }
