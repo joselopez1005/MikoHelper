@@ -146,14 +146,20 @@ fun MessageBubble(
     val backgroundBubbleColor: Color
     val messageAlignment: Alignment
 
-    if (messageItem.role == MessageItem.USER) {
-        backgroundBubbleColor = MaterialTheme.colorScheme.primary
-        chatBubbleShape = RoundedCornerShape(20.dp, 4.dp, 20.dp, 20.dp)
-        messageAlignment = Alignment.TopEnd
-    } else {
-        backgroundBubbleColor = MaterialTheme.colorScheme.surfaceVariant
-        chatBubbleShape = RoundedCornerShape(4.dp, 20.dp, 20.dp, 20.dp)
-        messageAlignment = Alignment.TopStart
+    when (messageItem.role) {
+        MessageItem.USER -> {
+            backgroundBubbleColor = MaterialTheme.colorScheme.primary
+            chatBubbleShape = RoundedCornerShape(20.dp, 4.dp, 20.dp, 20.dp)
+            messageAlignment = Alignment.TopEnd
+        }
+        MessageItem.ASSISTANT -> {
+            backgroundBubbleColor = MaterialTheme.colorScheme.surfaceVariant
+            chatBubbleShape = RoundedCornerShape(4.dp, 20.dp, 20.dp, 20.dp)
+            messageAlignment = Alignment.TopStart
+        }
+        else -> {
+            return
+        }
     }
 
     Box(

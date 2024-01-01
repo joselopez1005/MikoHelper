@@ -1,12 +1,12 @@
 package com.example.mikohelper.presentation.ui.new_chat_screen
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -42,7 +42,7 @@ fun NewChatScreen(
 @Composable
 fun NewChatScreenContent(
     navController: NavController,
-    states: State<NewChatStates>,
+    state: State<NewChatStates>,
     onEvent: (NewChatEvent) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -62,28 +62,39 @@ fun NewChatScreenContent(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            Row (
+
+            LazyVerticalGrid(
+                columns =  GridCells.Adaptive(150.dp),
                 horizontalArrangement = Arrangement.SpaceAround,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
+                modifier = Modifier.fillMaxSize()
             ) {
-                ProfilePersonalityCard(
-                    name = "Akeshi",
-                    personality = "mean",
-                    modifier = Modifier.clickable {
-                        onEvent(NewChatEvent.OnCreateChat(
-                            selectedChat = states.value.listOfCharacters.first(),
-                            navigate = {chatId ->
-                                navController.navigate("$CHAT_SCREEN/$chatId")
-                            }
-                        ))
-                    }
-                )
-                ProfilePersonalityCard(name = "Akeshi", personality = "mean")
+                items(state.value.listOfCharacters.size) { character->
+                    ProfilePersonalityCard(
+                        name = state.value.listOfCharacters[character].recipientName,
+                        personality = state.value.listOfCharacters[character].personality.mapPersonalityToBriefDescription(),
+                        onEvent = {
+                                  onEvent(NewChatEvent.OnCreateChat(
+                                      selectedChat = state.value.listOfCharacters[character],
+                                      navigate = {chatId ->
+                                        navController.navigate("$CHAT_SCREEN/$chatId")
+                                      }
+                                  ))
+                        },
+                        modifier = modifier
+                            .padding(8.dp)
+                            .height(300.dp)
+                    )
+                }
             }
         }
     }
+}
+
+private fun String.mapPersonalityToBriefDescription(): String {
+    if (this == NewChatStates.Personalities.homelander) {
+        return "Selfish and Rude"
+    }
+    return  "Helpful Assitant"
 }
 
 @Composable
@@ -94,6 +105,6 @@ fun NewChatScreenContentPreview() {
         val state = remember {
             mutableStateOf(NewChatStates())
         }
-        NewChatScreenContent(navController = navController, states = state, {})
+        NewChatScreenContent(navController = navController, state = state, {})
     }
 }
