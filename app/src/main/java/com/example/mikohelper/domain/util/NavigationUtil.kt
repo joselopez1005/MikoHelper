@@ -8,4 +8,8 @@ class NavigationUtil {
         const val NEW_CHAT_SCREEN = "newchatscreen"
     }
 
+    object Results {
+        const val REFRESH_NEEDED = "refresh"
+    }
+
 }

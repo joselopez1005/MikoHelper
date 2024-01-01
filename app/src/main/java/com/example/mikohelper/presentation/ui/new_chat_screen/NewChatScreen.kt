@@ -22,6 +22,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.mikohelper.domain.util.NavigationUtil.Directions.CHAT_SCREEN
+import com.example.mikohelper.domain.util.NavigationUtil.Directions.NEW_CHAT_SCREEN
 import com.example.mikohelper.presentation.ui.components.MikoHelperAppBar
 import com.example.mikohelper.presentation.ui.components.ProfilePersonalityCard
 import com.example.mikohelper.presentation.ui.theme.MikoHelperTheme
@@ -76,7 +77,11 @@ fun NewChatScreenContent(
                                   onEvent(NewChatEvent.OnCreateChat(
                                       selectedChat = state.value.listOfCharacters[character],
                                       navigate = {chatId ->
-                                        navController.navigate("$CHAT_SCREEN/$chatId")
+                                        navController.navigate("$CHAT_SCREEN/$chatId") {
+                                            popUpTo(NEW_CHAT_SCREEN) {
+                                                inclusive = true
+                                            }
+                                        }
                                       }
                                   ))
                         },

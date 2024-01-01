@@ -1,5 +1,6 @@
 package com.example.mikohelper.presentation.ui.home_screen
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -34,6 +35,10 @@ class HomeScreenViewModel @Inject constructor(
             }
             is HomeScreenEvent.OnCreateNewChat -> {
                 event.navigate.invoke()
+            }
+            is HomeScreenEvent.OnRefresh -> {
+                Log.d("HomeViewModel", "I RAN ")
+                getAllChatsWithMessages()
             }
         }
     }

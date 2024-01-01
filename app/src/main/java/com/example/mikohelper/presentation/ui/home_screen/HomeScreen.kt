@@ -17,6 +17,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,8 +35,13 @@ import com.example.mikohelper.presentation.ui.theme.MikoHelperTheme
 @Composable
 fun HomeScreen(
     navController: NavController,
+    shouldRefresh: Boolean,
     viewModel: HomeScreenViewModel = hiltViewModel()
 ) {
+    LaunchedEffect(shouldRefresh) {
+        viewModel.onEvent(HomeScreenEvent.OnRefresh)
+    }
+
     HomeScreenContent(
         navController,
         viewModel::onEvent,
