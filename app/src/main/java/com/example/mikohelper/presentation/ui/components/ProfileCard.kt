@@ -2,19 +2,19 @@ package com.example.mikohelper.presentation.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,10 +22,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -107,100 +106,48 @@ fun ProfileCardWithLatestMessage(
     }
 }
 
-//@Composable
-//fun ProfilePersonalityCard(
-//    modifier: Modifier = Modifier
-//) {
-//    ElevatedCard (
-//        modifier = modifier.height(160.dp).width(140.dp),
-//        colors = CardDefaults.cardColors(
-//            MaterialTheme.colorScheme.inversePrimary
-//        ),
-//        elevation = CardDefaults.cardElevation(
-//            defaultElevation = 6.dp
-//        ),
-//
-//    ) {
-//        Column (
-//            horizontalAlignment = Alignment.CenterHorizontally,
-//            modifier = Modifier.fillMaxHeight()
-//        ) {
-//            Column(
-//                horizontalAlignment = Alignment.CenterHorizontally,
-//                modifier = Modifier.weight(1f).padding(top = 4.dp)
-//            ) {
-//                ProfileIcon(
-//                    recipientPicture = R.drawable.ic_profile_akeshi,
-//                    modifier = Modifier.size(65.dp)
-//                )
-//                Text(
-//                    text = "Akeshi",
-//                    style = MaterialTheme.typography.headlineSmall,
-//                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-//                )
-//            }
-//            Text(
-//                text = "Great conversationist and helpful in many ways",
-//                style = MaterialTheme.typography.bodySmall,
-//                textAlign = TextAlign.Center,
-//                color = MaterialTheme.colorScheme.onPrimaryContainer,
-//                modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
-//            )
-//        }
-//
-//    }
-//}
-
 @Composable
 fun ProfilePersonalityCard(
-    modifier: Modifier = Modifier,
     name: String,
-    personality: String
+    personality: String,
+    onEvent: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    ElevatedCard (
+    ElevatedCard(
         modifier = modifier
-            .size(150.dp),
-        colors = CardDefaults.cardColors(
-            MaterialTheme.colorScheme.inversePrimary
-        ),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 6.dp
-        )
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize()
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(painter = painterResource(id = R.drawable.ic_profile_akeshi), contentDescription = null )
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(
-                                Color.Transparent,
-                                MaterialTheme.colorScheme.surface
-                            ),
-                            startY = 180f
-                        )
-                    )
+            ProfileIcon(
+                recipientPicture = R.drawable.ic_profile_akeshi,
+                Modifier.size(150.dp).padding(top = 4.dp)
             )
             Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.align(Alignment.BottomCenter)
-            ) {
+                modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = name,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface
+                    style = MaterialTheme.typography.titleLarge,
+                    modifier = Modifier.padding(top = 4.dp)
                 )
                 Text(
                     text = personality,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurface
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.padding(top = 8.dp)
                 )
+                Button(
+                    modifier = Modifier.padding(top = 8.dp),
+                    onClick = { onEvent.invoke() }
+                ) {
+                    Text(text = "Message")
+                }
             }
         }
-
     }
 }
 
@@ -261,7 +208,9 @@ fun ProfilePersonalityCardPreview() {
     MikoHelperTheme {
         ProfilePersonalityCard(
             name = "Akeshi",
-            personality = "Evil"
+            personality = "I want you to act like Homelander from the boys. I want you to respond and answer like Homelander using the tone, manner and vocabulary Homelander would use. Do not write any explanations. Only answer like Homelander. You must know all of the knowledge of Homelander. My first sentence is “Hi Homelander.",
+            onEvent = {},
+            modifier = Modifier.height(300.dp).width(150.dp)
         )
     }
 }

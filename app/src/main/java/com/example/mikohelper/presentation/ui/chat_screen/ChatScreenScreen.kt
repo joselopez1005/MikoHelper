@@ -1,6 +1,7 @@
 package com.example.mikohelper.presentation.ui.chat_screen
 
 import UserInputBar
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -39,7 +40,9 @@ import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.example.mikohelper.domain.chat_items.MessageItem
+import com.example.mikohelper.domain.util.NavigationUtil
 import com.example.mikohelper.presentation.ui.components.MikoHelperAppBar
 import com.example.mikohelper.presentation.ui.components.ProfileCard
 import com.example.mikohelper.presentation.ui.theme.MikoHelperTheme
@@ -49,6 +52,7 @@ import java.time.LocalDateTime
 @Composable
 fun ChatScreen(
     chatItemId: Int,
+    navController: NavController,
     viewModel: ChatScreenViewModel = hiltViewModel()
 ) {
     viewModel.onEvent(ChatScreenEvent.GetChatMessages(chatItemId))
@@ -56,6 +60,12 @@ fun ChatScreen(
         viewModel.state,
         viewModel::onEvent
     )
+    BackHandler {
+        navController.previousBackStackEntry
+            ?.savedStateHandle
+            ?.set(NavigationUtil.Results.REFRESH_NEEDED, true)
+        navController.popBackStack()
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -146,14 +156,20 @@ fun MessageBubble(
     val backgroundBubbleColor: Color
     val messageAlignment: Alignment
 
-    if (messageItem.role == MessageItem.USER) {
-        backgroundBubbleColor = MaterialTheme.colorScheme.primary
-        chatBubbleShape = RoundedCornerShape(20.dp, 4.dp, 20.dp, 20.dp)
-        messageAlignment = Alignment.TopEnd
-    } else {
-        backgroundBubbleColor = MaterialTheme.colorScheme.surfaceVariant
-        chatBubbleShape = RoundedCornerShape(4.dp, 20.dp, 20.dp, 20.dp)
-        messageAlignment = Alignment.TopStart
+    when (messageItem.role) {
+        MessageItem.USER -> {
+            backgroundBubbleColor = MaterialTheme.colorScheme.primary
+            chatBubbleShape = RoundedCornerShape(20.dp, 4.dp, 20.dp, 20.dp)
+            messageAlignment = Alignment.TopEnd
+        }
+        MessageItem.ASSISTANT -> {
+            backgroundBubbleColor = MaterialTheme.colorScheme.surfaceVariant
+            chatBubbleShape = RoundedCornerShape(4.dp, 20.dp, 20.dp, 20.dp)
+            messageAlignment = Alignment.TopStart
+        }
+        else -> {
+            return
+        }
     }
 
     Box(

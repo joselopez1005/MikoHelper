@@ -14,6 +14,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.mikohelper.domain.util.NavigationUtil
 import com.example.mikohelper.domain.util.NavigationUtil.Directions.ARG_CHAT_ITEM_ID
 import com.example.mikohelper.domain.util.NavigationUtil.Directions.CHAT_SCREEN
 import com.example.mikohelper.domain.util.NavigationUtil.Directions.HOME_SCREEN
@@ -37,14 +38,17 @@ class MainActivity : ComponentActivity() {
                     MikoHelperTheme {
                         val navController = rememberNavController()
                         NavHost(navController = navController, startDestination = HOME_SCREEN) {
-                            composable(HOME_SCREEN) { HomeScreen(navController) }
+                            composable(HOME_SCREEN) {
+                                val shouldRefresh = it.savedStateHandle.get<Boolean>(NavigationUtil.Results.REFRESH_NEEDED) ?: false
+                                HomeScreen(navController, shouldRefresh)
+                            }
                             composable(NEW_CHAT_SCREEN) { NewChatScreen(navController) }
                             composable(
                                 route = "$CHAT_SCREEN/{$ARG_CHAT_ITEM_ID}",
                                 arguments = listOf(navArgument(ARG_CHAT_ITEM_ID) {type = NavType.IntType})
                             ){ backStackEntry ->
                                 val chatItemId = backStackEntry.arguments?.getInt(ARG_CHAT_ITEM_ID)
-                                ChatScreen(chatItemId!!)
+                                ChatScreen(chatItemId!!, navController)
                             }
                         }
                     }
