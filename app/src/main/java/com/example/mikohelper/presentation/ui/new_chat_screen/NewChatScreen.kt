@@ -51,7 +51,7 @@ fun NewChatScreenContent(
         topBar = {
             MikoHelperAppBar(
                 title = { Text(text = "New Chat") },
-                onNavIconPressed = {},
+                onNavIconPressed = {navController.popBackStack()},
                 actions = {}
             )
         },
@@ -85,9 +85,10 @@ fun NewChatScreenContent(
                                       }
                                   ))
                         },
+                        recipientPicture = state.value.listOfCharacters[character].profilePictureRef,
                         modifier = modifier
                             .padding(8.dp)
-                            .height(300.dp)
+                            .height(330.dp)
                     )
                 }
             }
@@ -98,6 +99,12 @@ fun NewChatScreenContent(
 private fun String.mapPersonalityToBriefDescription(): String {
     if (this == NewChatStates.Personalities.homelander) {
         return "Selfish and Rude"
+    }
+    if (this == NewChatStates.Personalities.helpfulAssitant) {
+        return "Reliable, responsive, empathetic: your helpful assistant."
+    }
+    if (this == NewChatStates.Personalities.storyTeller) {
+        return "Masterful storyteller, captivating hearts with tales."
     }
     return  "Helpful Assitant"
 }

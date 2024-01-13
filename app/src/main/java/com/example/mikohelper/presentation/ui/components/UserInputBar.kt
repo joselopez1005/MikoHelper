@@ -1,5 +1,6 @@
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -10,11 +11,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Face
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -140,6 +148,109 @@ private fun UserInputTextBar(
                 style = MaterialTheme.typography.bodyLarge.copy(color = disableContentColor)
             )
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun UserInputMessage(
+    chatItem: ChatItem,
+    sendButtonAction: (ChatScreenEvent) -> Unit,
+    resetScroll: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var isKeyboardOpen by rememberSaveable { mutableStateOf(false) }
+    if (isKeyboardOpen) {
+        BackHandler {
+            isKeyboardOpen = false
+        }
+    }
+    var textState by rememberSaveable(stateSaver = TextFieldValue.Saver) {
+        mutableStateOf(TextFieldValue())
+    }
+    var textFieldFocusState by remember { mutableStateOf(false) }
+
+    Row(
+        modifier = modifier
+    ) {
+        TextField(
+            value = textState,
+            onValueChange = {
+                textState = it
+            },
+            placeholder = {
+                Text(
+                    text = "Type a Message",
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            },
+            colors = TextFieldDefaults.textFieldColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                textColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                placeholderColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                cursorColor = MaterialTheme.colorScheme.onSecondaryContainer
+            ),
+            trailingIcon = {
+                Row (
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .width(70.dp)
+                        .padding(end = 10.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Face,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                    Icon(
+                        imageVector = Icons.Filled.Send,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                        modifier = Modifier.clickable {
+                            sendButtonAction.invoke(
+                                ChatScreenEvent.OnUserSendMessage(
+                                    message = textState.text,
+                                    chatItem = chatItem
+                                )
+                            )
+                            textState = TextFieldValue()
+                        }
+                    )
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged { state ->
+                    if (state.isFocused) {
+                        resetScroll.invoke()
+                    }
+                    textFieldFocusState = state.isFocused
+                }
+        )
+    }
+}
+
+@Preview
+@Composable
+fun UserInputMessagePreview() {
+    MikoHelperTheme {
+        UserInputMessage(
+            chatItem = ChatItem(0, "Miko", "Nice", 0),
+            sendButtonAction = {},
+            resetScroll = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+fun UserInputMessageDarkThemePreview() {
+    MikoHelperTheme(darkTheme = true) {
+        UserInputMessage(
+            chatItem = ChatItem(0, "Miko", "Nice", 0),
+            sendButtonAction = {},
+            resetScroll = {}
+        )
     }
 }
 

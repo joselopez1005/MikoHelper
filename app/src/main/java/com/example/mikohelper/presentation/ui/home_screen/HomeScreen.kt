@@ -1,5 +1,6 @@
 package com.example.mikohelper.presentation.ui.home_screen
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -35,10 +36,11 @@ import com.example.mikohelper.presentation.ui.theme.MikoHelperTheme
 @Composable
 fun HomeScreen(
     navController: NavController,
-    shouldRefresh: Boolean,
+    shouldRefresh: Boolean = false,
     viewModel: HomeScreenViewModel = hiltViewModel()
 ) {
     LaunchedEffect(shouldRefresh) {
+        Log.d("HomeScreen", "Iran I ran I")
         viewModel.onEvent(HomeScreenEvent.OnRefresh)
     }
 
@@ -62,7 +64,7 @@ fun HomeScreenContent(
                 actions = {
                     Icon(
                         imageVector = Icons.Filled.Edit,
-                        contentDescription = null,
+                        contentDescription = null
                     )
                 }
             )

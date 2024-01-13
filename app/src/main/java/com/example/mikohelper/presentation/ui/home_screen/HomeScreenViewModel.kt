@@ -21,10 +21,6 @@ class HomeScreenViewModel @Inject constructor(
     private val _state = mutableStateOf(HomeScreenStates())
     val state: State<HomeScreenStates> = _state
 
-    init {
-        getAllChatsWithMessages()
-    }
-
     fun onEvent(event: HomeScreenEvent) {
         when(event) {
             is HomeScreenEvent.OnChatSelected -> {

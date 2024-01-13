@@ -109,6 +109,7 @@ fun ProfileCardWithLatestMessage(
 @Composable
 fun ProfilePersonalityCard(
     name: String,
+    recipientPicture: Int,
     personality: String,
     onEvent: () -> Unit,
     modifier: Modifier = Modifier
@@ -117,35 +118,41 @@ fun ProfilePersonalityCard(
         modifier = modifier
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            ProfileIcon(
-                recipientPicture = R.drawable.ic_profile_akeshi,
-                Modifier.size(150.dp).padding(top = 4.dp)
-            )
             Column(
-                modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(top = 4.dp)
+                modifier = Modifier.weight(1f),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                ProfileIcon(
+                    recipientPicture = recipientPicture,
+                    Modifier
+                        .size(150.dp)
+                        .padding(top = 4.dp)
                 )
-                Text(
-                    text = personality,
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-                Button(
-                    modifier = Modifier.padding(top = 8.dp),
-                    onClick = { onEvent.invoke() }
-                ) {
-                    Text(text = "Message")
+                Column(
+                    modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = name,
+                        style = MaterialTheme.typography.titleMedium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                    Text(
+                        text = personality,
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
                 }
+            }
+            Button(
+                modifier = Modifier.padding(vertical = 8.dp),
+                onClick = { onEvent.invoke() }
+            ) {
+                Text(text = "Message")
             }
         }
     }
@@ -159,7 +166,7 @@ fun ProfileIcon(
     Image(
         painter = painterResource(id = recipientPicture),
         contentDescription = null,
-        contentScale= ContentScale.Crop,
+        contentScale= ContentScale.Fit,
         modifier = modifier
             .border(
                 BorderStroke(2.dp, MaterialTheme.colorScheme.onPrimary),
@@ -210,7 +217,10 @@ fun ProfilePersonalityCardPreview() {
             name = "Akeshi",
             personality = "I want you to act like Homelander from the boys. I want you to respond and answer like Homelander using the tone, manner and vocabulary Homelander would use. Do not write any explanations. Only answer like Homelander. You must know all of the knowledge of Homelander. My first sentence is “Hi Homelander.",
             onEvent = {},
-            modifier = Modifier.height(300.dp).width(150.dp)
+            recipientPicture = R.drawable.ic_profile_akeshi,
+            modifier = Modifier
+                .height(300.dp)
+                .width(150.dp)
         )
     }
 }

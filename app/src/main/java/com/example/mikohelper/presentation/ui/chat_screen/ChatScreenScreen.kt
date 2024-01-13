@@ -1,6 +1,6 @@
 package com.example.mikohelper.presentation.ui.chat_screen
 
-import UserInputBar
+import UserInputMessage
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,6 +41,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.mikohelper.domain.chat_items.MessageItem
 import com.example.mikohelper.domain.util.NavigationUtil
 import com.example.mikohelper.presentation.ui.components.MikoHelperAppBar
@@ -58,12 +59,14 @@ fun ChatScreen(
     viewModel.onEvent(ChatScreenEvent.GetChatMessages(chatItemId))
     ChatScreenContent(
         viewModel.state,
+        navController = navController,
         viewModel::onEvent
     )
     BackHandler {
         navController.previousBackStackEntry
             ?.savedStateHandle
             ?.set(NavigationUtil.Results.REFRESH_NEEDED, true)
+
         navController.popBackStack()
     }
 }
@@ -72,6 +75,7 @@ fun ChatScreen(
 @Composable
 fun ChatScreenContent(
     state: State<ChatScreenStates>,
+    navController: NavController,
     onButtonPressed: (ChatScreenEvent) -> Unit
 ) {
     val scrollState = rememberLazyListState()
@@ -86,6 +90,13 @@ fun ChatScreenContent(
                     )
                 },
                 actions = { Icon(imageVector = Icons.Outlined.Search, contentDescription = null) },
+                onNavIconPressed = {
+                    navController.previousBackStackEntry
+                        ?.savedStateHandle
+                        ?.set(NavigationUtil.Results.REFRESH_NEEDED, true)
+
+                    navController.popBackStack()
+                }
             )
         },
         contentWindowInsets = ScaffoldDefaults
@@ -105,16 +116,16 @@ fun ChatScreenContent(
                 scrollState = scrollState,
                 modifier = Modifier
                     .weight(1f)
-                    .padding(bottom = 16.dp, start = 8.dp, end = 8.dp)
+                    .padding(start = 8.dp, end = 8.dp)
             )
-            UserInputBar(
+            UserInputMessage(
                 chatItem = state.value.chatItem,
+                sendButtonAction = onButtonPressed,
                 resetScroll = {
                     scope.launch {
                         scrollState.scrollToItem(0)
                     }
                 },
-                sendButtonAction = onButtonPressed,
                 modifier = Modifier
                     .navigationBarsPadding()
                     .imePadding()
@@ -137,6 +148,13 @@ fun MessagesSection(
         reverseLayout = true
     ) {
         items(listOfMessages.size) {
+            if (it == 0) {
+                MessageBubble(
+                    messageItem = listOfMessages[it],
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+                return@items
+            }
             MessageBubble(
                 messageItem = listOfMessages[it],
                 modifier = Modifier.padding(top = 8.dp)
@@ -216,7 +234,8 @@ fun ChatScreenPreview() {
         }
         ChatScreenContent(
             state = state,
-            onButtonPressed = {}
+            onButtonPressed = {},
+            navController = rememberNavController()
         )
     }
 }
