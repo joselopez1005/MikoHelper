@@ -22,13 +22,17 @@ class NewChatScreenViewModel @Inject constructor(
     fun onEvent(event: NewChatEvent) {
         when (event) {
             is OnCreateChat -> {
+                _state.value = _state.value.copy(loading = true)
                 viewModelScope.launch {
                     repository.createNewChat(event.selectedChat).collect{ result ->
                         if (result is Resource.Success) {
+                            _state.value = _state.value.copy(loading = false)
                             event.navigate.invoke(result.data!!.chatId)
                         }
                         if (result is Resource.Error) {
-                            _state.value = _state.value.copy(error = result.message)
+                            _state.value = _state.value.copy(
+                                error = result.message,
+                                loading = false)
                         }
                     }
                 }
