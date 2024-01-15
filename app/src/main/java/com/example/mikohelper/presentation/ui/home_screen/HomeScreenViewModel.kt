@@ -46,7 +46,6 @@ class HomeScreenViewModel @Inject constructor(
                         it
                     }
                 }
-
                 val previousRemovingState = _state.value.isRemovingState
                 _state.value = _state.value.copy(isRemovingState = !previousRemovingState, listOfChats = updatedChatList.toMutableList())
             }
@@ -61,6 +60,12 @@ class HomeScreenViewModel @Inject constructor(
                     }
                 }
                _state.value = _state.value.copy(listOfChats = updatedChatList.toMutableList())
+            }
+
+            is HomeScreenEvent.OnDeleteChats -> {
+                deleteChats().invokeOnCompletion {
+                    getAllChatsWithMessages()
+                }
             }
         }
     }
@@ -106,6 +111,18 @@ class HomeScreenViewModel @Inject constructor(
                 }
                 if (result is Error) {
                     _state.value = _state.value.copy(error = result.message)
+                }
+            }
+        }
+    }
+
+    private fun deleteChats() = run {
+        viewModelScope.launch {
+            _state.value.listOfChats.filter { it.isSelected }.forEach {
+                repository.deleteChat(it.chatItem).collect { result ->
+                    if (!result) {
+                        _state.value = _state.value.copy(error = "Error deleting messages")
+                    }
                 }
             }
         }

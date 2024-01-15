@@ -46,12 +46,8 @@ fun HomeScreen(
         viewModel.onEvent(HomeScreenEvent.OnRefresh)
     }
 
-    BackHandler {
-        if (viewModel.state.value.isRemovingState) {
-            viewModel.onEvent(HomeScreenEvent.OnToggleRemoveState)
-            return@BackHandler
-        }
-        navController.popBackStack()
+    BackHandler(viewModel.state.value.isRemovingState) {
+        viewModel.onEvent(HomeScreenEvent.OnToggleRemoveState)
     }
 
     HomeScreenContent(
@@ -111,7 +107,14 @@ fun HomeScreenAppBar(
         MikoHelperAppBar(
             title = { Text(text = "Chats") },
             actions = {
-                Icon(imageVector = Icons.Filled.Delete, contentDescription = null)
+                Icon(
+                    imageVector = Icons.Filled.Delete,
+                    contentDescription = null,
+                    modifier = Modifier.clickable {
+                        onEvent(HomeScreenEvent.OnDeleteChats)
+                        onEvent(HomeScreenEvent.OnToggleRemoveState)
+                    }
+                )
             },
             onNavIconPressed = {
                 onEvent(HomeScreenEvent.OnToggleRemoveState)
@@ -143,18 +146,18 @@ fun ListOfChatsSection(
     LazyColumn(
         modifier = modifier.fillMaxSize()
     ) {
-        items(state.value.listOfChats.size) {
+        items(state.value.listOfChats.size, key = {item -> item}) { item ->
             if (state.value.isRemovingState) {
                 ProfileCardRemovingState(
-                    chatWithMessages = state.value.listOfChats[it],
-                    onSelected = { onEvent(HomeScreenEvent.OnChatSelectedForRemoval(state.value.listOfChats[it])) }
+                    chatWithMessages = state.value.listOfChats[item],
+                    onSelected = { onEvent(HomeScreenEvent.OnChatSelectedForRemoval(state.value.listOfChats[item])) }
                 )
                 return@items
             }
             ProfileCardWithLatestMessageTimeStamp(
-                chatWithMessages = state.value.listOfChats[it],
+                chatWithMessages = state.value.listOfChats[item],
                 modifier = Modifier.clickable {
-                    val selectedChatItemId = state.value.listOfChats[it].chatItem.chatId
+                    val selectedChatItemId = state.value.listOfChats[item].chatItem.chatId
                     onEvent.invoke(HomeScreenEvent.OnChatSelected {
                         navController.navigate("$CHAT_SCREEN/$selectedChatItemId")
                     })
