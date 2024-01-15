@@ -1,6 +1,6 @@
 package com.example.mikohelper.presentation.ui.home_screen
 
-import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -29,8 +30,10 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.mikohelper.domain.util.NavigationUtil.Directions.CHAT_SCREEN
 import com.example.mikohelper.domain.util.NavigationUtil.Directions.NEW_CHAT_SCREEN
+import com.example.mikohelper.presentation.ui.components.MikoHelperAppBar
 import com.example.mikohelper.presentation.ui.components.MikoHelperAppBarNoNavigation
-import com.example.mikohelper.presentation.ui.components.ProfileCardWithLatestMessage
+import com.example.mikohelper.presentation.ui.components.ProfileCardRemovingState
+import com.example.mikohelper.presentation.ui.components.ProfileCardWithLatestMessageTimeStamp
 import com.example.mikohelper.presentation.ui.theme.MikoHelperTheme
 
 @Composable
@@ -40,8 +43,11 @@ fun HomeScreen(
     viewModel: HomeScreenViewModel = hiltViewModel()
 ) {
     LaunchedEffect(shouldRefresh) {
-        Log.d("HomeScreen", "Iran I ran I")
         viewModel.onEvent(HomeScreenEvent.OnRefresh)
+    }
+
+    BackHandler(viewModel.state.value.isRemovingState) {
+        viewModel.onEvent(HomeScreenEvent.OnToggleRemoveState)
     }
 
     HomeScreenContent(
@@ -50,6 +56,7 @@ fun HomeScreen(
         viewModel.state
     )
 }
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreenContent(
@@ -59,15 +66,7 @@ fun HomeScreenContent(
 ) {
     Scaffold(
         topBar = {
-            MikoHelperAppBarNoNavigation(
-                title = { Text(text = "Chats")},
-                actions = {
-                    Icon(
-                        imageVector = Icons.Filled.Edit,
-                        contentDescription = null
-                    )
-                }
-            )
+            HomeScreenAppBar(state = state, onEvent = onEvent)
         },
         floatingActionButton = {
             FloatingActionButton(onClick = {
@@ -82,7 +81,7 @@ fun HomeScreenContent(
             .contentWindowInsets
 
     ) { paddingValues ->
-        Column (
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
@@ -97,6 +96,46 @@ fun HomeScreenContent(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HomeScreenAppBar(
+    state: State<HomeScreenStates>,
+    onEvent: (HomeScreenEvent) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    if (state.value.isRemovingState) {
+        MikoHelperAppBar(
+            title = { Text(text = "Chats") },
+            actions = {
+                Icon(
+                    imageVector = Icons.Filled.Delete,
+                    contentDescription = null,
+                    modifier = Modifier.clickable {
+                        onEvent(HomeScreenEvent.OnDeleteChats)
+                        onEvent(HomeScreenEvent.OnToggleRemoveState)
+                    }
+                )
+            },
+            onNavIconPressed = {
+                onEvent(HomeScreenEvent.OnToggleRemoveState)
+            }
+        )
+        return
+    }
+    MikoHelperAppBarNoNavigation(
+        title = { Text(text = "Chats") },
+        actions = {
+            Icon(
+                imageVector = Icons.Filled.Edit,
+                contentDescription = null,
+                modifier = Modifier.clickable {
+                    onEvent(HomeScreenEvent.OnToggleRemoveState)
+                }
+            )
+        }
+    )
+}
+
 @Composable
 fun ListOfChatsSection(
     navController: NavController,
@@ -107,12 +146,19 @@ fun ListOfChatsSection(
     LazyColumn(
         modifier = modifier.fillMaxSize()
     ) {
-        items(state.value.listOfChats.size) {
-            ProfileCardWithLatestMessage(
-                chatWithMessages = state.value.listOfChats[it],
+        items(state.value.listOfChats.size, key = {item -> item}) { item ->
+            if (state.value.isRemovingState) {
+                ProfileCardRemovingState(
+                    chatWithMessages = state.value.listOfChats[item],
+                    onSelected = { onEvent(HomeScreenEvent.OnChatSelectedForRemoval(state.value.listOfChats[item])) }
+                )
+                return@items
+            }
+            ProfileCardWithLatestMessageTimeStamp(
+                chatWithMessages = state.value.listOfChats[item],
                 modifier = Modifier.clickable {
-                    val selectedChatItemId = state.value.listOfChats[it].chatItem.chatId
-                    onEvent.invoke(HomeScreenEvent.OnChatSelected{
+                    val selectedChatItemId = state.value.listOfChats[item].chatItem.chatId
+                    onEvent.invoke(HomeScreenEvent.OnChatSelected {
                         navController.navigate("$CHAT_SCREEN/$selectedChatItemId")
                     })
                 }
@@ -124,11 +170,11 @@ fun ListOfChatsSection(
 @Preview
 @Composable
 fun HomeScreenContentPreview() {
-    val state = remember{
+    val state = remember {
         mutableStateOf(HomeScreenStates())
     }
     val navController = rememberNavController()
     MikoHelperTheme {
-        HomeScreenContent(navController,{},state)
+        HomeScreenContent(navController, {}, state)
     }
 }

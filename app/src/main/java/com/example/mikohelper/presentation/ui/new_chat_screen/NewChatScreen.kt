@@ -1,12 +1,16 @@
 package com.example.mikohelper.presentation.ui.new_chat_screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -15,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -37,6 +42,20 @@ fun NewChatScreen(
         viewModel.state,
         viewModel::onEvent
     )
+    if (viewModel.state.value.loading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f))
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .width(64.dp)
+                    .align(Alignment.Center),
+                color = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,12 +70,12 @@ fun NewChatScreenContent(
         topBar = {
             MikoHelperAppBar(
                 title = { Text(text = "New Chat") },
-                onNavIconPressed = {navController.popBackStack()},
+                onNavIconPressed = { navController.popBackStack() },
                 actions = {}
             )
         },
         containerColor = MaterialTheme.colorScheme.surfaceVariant
-        
+
     ) { paddingValues ->
         Column(
             modifier = modifier
@@ -65,25 +84,25 @@ fun NewChatScreenContent(
         ) {
 
             LazyVerticalGrid(
-                columns =  GridCells.Adaptive(150.dp),
+                columns = GridCells.Adaptive(150.dp),
                 horizontalArrangement = Arrangement.SpaceAround,
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(state.value.listOfCharacters.size) { character->
+                items(state.value.listOfCharacters.size) { character ->
                     ProfilePersonalityCard(
                         name = state.value.listOfCharacters[character].recipientName,
                         personality = state.value.listOfCharacters[character].personality.mapPersonalityToBriefDescription(),
                         onEvent = {
-                                  onEvent(NewChatEvent.OnCreateChat(
-                                      selectedChat = state.value.listOfCharacters[character],
-                                      navigate = {chatId ->
-                                        navController.navigate("$CHAT_SCREEN/$chatId") {
-                                            popUpTo(NEW_CHAT_SCREEN) {
-                                                inclusive = true
-                                            }
+                            onEvent(NewChatEvent.OnCreateChat(
+                                selectedChat = state.value.listOfCharacters[character],
+                                navigate = { chatId ->
+                                    navController.navigate("$CHAT_SCREEN/$chatId") {
+                                        popUpTo(NEW_CHAT_SCREEN) {
+                                            inclusive = true
                                         }
-                                      }
-                                  ))
+                                    }
+                                }
+                            ))
                         },
                         recipientPicture = state.value.listOfCharacters[character].profilePictureRef,
                         modifier = modifier
@@ -106,7 +125,7 @@ private fun String.mapPersonalityToBriefDescription(): String {
     if (this == NewChatStates.Personalities.storyTeller) {
         return "Masterful storyteller, captivating hearts with tales."
     }
-    return  "Helpful Assitant"
+    return "Helpful Assitant"
 }
 
 @Composable

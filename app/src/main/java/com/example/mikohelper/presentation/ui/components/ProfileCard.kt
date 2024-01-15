@@ -17,8 +17,13 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -59,7 +64,29 @@ fun ProfileCard(
 }
 
 @Composable
-fun ProfileCardWithLatestMessage(
+fun ProfileCardWithLatestMessageTimeStamp(
+    chatWithMessages: ChatItemWithMessageItems,
+    modifier: Modifier = Modifier
+) {
+    val latestMessage = if (chatWithMessages.messageItem.isEmpty()) { "" } else chatWithMessages.messageItem.last().content
+    Row (
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier.fillMaxWidth()
+    ) {
+        ProfileCardWithMessage(chatWithMessages = chatWithMessages, modifier = Modifier.weight(1f))
+        if (latestMessage.isNotBlank()) {
+            Text(
+                text = convertLocalDateTimeToLocalTime(chatWithMessages.messageItem.last().sentAt),
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(end = 8.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun ProfileCardWithMessage(
     chatWithMessages: ChatItemWithMessageItems,
     modifier: Modifier = Modifier
 ) {
@@ -68,12 +95,9 @@ fun ProfileCardWithLatestMessage(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
-            .fillMaxWidth()
             .padding(8.dp)
     ) {
-        Row (
-            modifier = Modifier.weight(1f)
-        ) {
+        Row {
             ProfileIcon(
                 recipientPicture = chatWithMessages.chatItem.profilePictureRef,
                 modifier = Modifier.requiredSize(58.dp)
@@ -97,12 +121,26 @@ fun ProfileCardWithLatestMessage(
 
             }
         }
-        if (latestMessage.isNotBlank()) {
-            Text(
-                text = convertLocalDateTimeToLocalTime(chatWithMessages.messageItem.last().sentAt),
-                style = MaterialTheme.typography.bodySmall
-            )
+    }
+}
+@Composable
+fun ProfileCardRemovingState(
+    chatWithMessages: ChatItemWithMessageItems,
+    onSelected: () -> Unit = {},
+    modifier: Modifier = Modifier
+) {
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier.fillMaxWidth()
+    ) {
+        var isSelected by remember {
+            mutableStateOf(chatWithMessages.isSelected)
         }
+        ProfileCardWithMessage(chatWithMessages = chatWithMessages, modifier = Modifier.weight(1f))
+        RadioButton(selected = isSelected, onClick = {
+            isSelected = !isSelected
+            onSelected.invoke() })
     }
 }
 
@@ -198,9 +236,22 @@ fun ProfileCardPreviewDark(){
 
 @Preview(showBackground = true)
 @Composable
-fun ProfileCardWithLatestMessagePreview() {
+fun ProfileCardWithLatestMessageTimeStampPreview() {
     MikoHelperTheme {
-        ProfileCardWithLatestMessage(
+        ProfileCardWithLatestMessageTimeStamp(
+            chatWithMessages = ChatItemWithMessageItems(
+                chatItem = ChatItem(1, "Miko", "Helpful", R.drawable.ic_profile_akeshi),
+                messageItem = listOf(MessageItem(1, "Hello", "user", LocalDateTime.now()))
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ProfileCardRemovingStatePreview() {
+    MikoHelperTheme {
+        ProfileCardRemovingState(
             chatWithMessages = ChatItemWithMessageItems(
                 chatItem = ChatItem(1, "Miko", "Helpful", R.drawable.ic_profile_akeshi),
                 messageItem = listOf(MessageItem(1, "Hello", "user", LocalDateTime.now()))
@@ -221,6 +272,19 @@ fun ProfilePersonalityCardPreview() {
             modifier = Modifier
                 .height(300.dp)
                 .width(150.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ProfileCardWithMessagePreview() {
+    MikoHelperTheme {
+        ProfileCardWithMessage(
+            chatWithMessages = ChatItemWithMessageItems(
+                chatItem = ChatItem(1, "Miko", "Helpful", R.drawable.ic_profile_akeshi),
+                messageItem = listOf(MessageItem(1, "Hello", "user", LocalDateTime.now()))
+            )
         )
     }
 }

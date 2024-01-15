@@ -1,6 +1,5 @@
 package com.example.mikohelper.presentation.ui.home_screen
 
-import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -16,25 +15,57 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeScreenViewModel @Inject constructor(
     private val repository: ChatRepository
-) :ViewModel() {
+) : ViewModel() {
 
     private val _state = mutableStateOf(HomeScreenStates())
     val state: State<HomeScreenStates> = _state
 
     fun onEvent(event: HomeScreenEvent) {
-        when(event) {
+        when (event) {
             is HomeScreenEvent.OnChatSelected -> {
                 event.navigate.invoke()
             }
+
             is HomeScreenEvent.OnCreateChat -> {
                 createNewChat(event.chatItem).invokeOnCompletion { getAllChatsWithMessages() }
             }
+
             is HomeScreenEvent.OnCreateNewChat -> {
                 event.navigate.invoke()
             }
+
             is HomeScreenEvent.OnRefresh -> {
-                Log.d("HomeViewModel", "I RAN ")
                 getAllChatsWithMessages()
+            }
+
+            is HomeScreenEvent.OnToggleRemoveState -> {
+                val updatedChatList = _state.value.listOfChats.map {
+                    if (it.isSelected) {
+                        it.copy(isSelected = false)
+                    } else {
+                        it
+                    }
+                }
+                val previousRemovingState = _state.value.isRemovingState
+                _state.value = _state.value.copy(isRemovingState = !previousRemovingState, listOfChats = updatedChatList.toMutableList())
+            }
+
+            is HomeScreenEvent.OnChatSelectedForRemoval -> {
+                val chatIdToUpdate = event.chatItemWithMessageItem.chatItem.chatId
+                val updatedChatList = _state.value.listOfChats.map {
+                    if (it.chatItem.chatId == chatIdToUpdate) {
+                        it.copy(isSelected = !it.isSelected)
+                    } else {
+                        it
+                    }
+                }
+               _state.value = _state.value.copy(listOfChats = updatedChatList.toMutableList())
+            }
+
+            is HomeScreenEvent.OnDeleteChats -> {
+                deleteChats().invokeOnCompletion {
+                    getAllChatsWithMessages()
+                }
             }
         }
     }
@@ -46,7 +77,7 @@ class HomeScreenViewModel @Inject constructor(
         viewModelScope.launch {
             repository.getAllChats().collect { result ->
                 if (result is Success) {
-                    result.data?.forEach{
+                    result.data?.forEach {
                         getAllChatsWithMessages(it)
                     }
                 } else {
@@ -80,6 +111,18 @@ class HomeScreenViewModel @Inject constructor(
                 }
                 if (result is Error) {
                     _state.value = _state.value.copy(error = result.message)
+                }
+            }
+        }
+    }
+
+    private fun deleteChats() = run {
+        viewModelScope.launch {
+            _state.value.listOfChats.filter { it.isSelected }.forEach {
+                repository.deleteChat(it.chatItem).collect { result ->
+                    if (!result) {
+                        _state.value = _state.value.copy(error = "Error deleting messages")
+                    }
                 }
             }
         }

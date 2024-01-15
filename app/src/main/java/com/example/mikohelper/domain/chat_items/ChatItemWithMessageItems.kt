@@ -5,5 +5,6 @@ package com.example.mikohelper.domain.chat_items
  */
 data class ChatItemWithMessageItems(
     val chatItem: ChatItem,
-    val messageItem: List<MessageItem>
+    val messageItem: List<MessageItem>,
+    val isSelected: Boolean = false  // SelectedForDeletion, scope might increase later on
 )
