@@ -6,7 +6,8 @@ data class MessageItem(
     val messageId: Int = 0,
     val content: String,
     val role: String,
-    val sentAt: LocalDateTime
+    val sentAt: LocalDateTime,
+    val isSelectedForRemoval: Boolean = false
 ) {
     companion object {
         const val USER = "user"

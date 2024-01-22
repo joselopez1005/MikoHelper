@@ -29,6 +29,42 @@ class ChatScreenViewModel @Inject constructor(
             is ChatScreenEvent.GetChatMessages -> {
                 getChatInformation(event.chatItemId).invokeOnCompletion { getChatWithMessages() }
             }
+            is ChatScreenEvent.OnMessageSelectedForRemoval -> {
+                val updatedMessageList = state.value.listOfMessages.map {
+                    if (it.messageId == event.messageItem.messageId) {
+                        it.copy(isSelectedForRemoval = !it.isSelectedForRemoval)
+                    } else {
+                        it
+                    }
+                }.toMutableList()
+                _state.value = _state.value.copy(listOfMessages = updatedMessageList)
+                if (_state.value.listOfMessages.none { it.isSelectedForRemoval }) {
+                    _state.value = _state.value.copy(isOnDeletionState = false)
+                }
+            }
+            is ChatScreenEvent.OnToggleDeleteState -> {
+                if (_state.value.listOfMessages.none { it.isSelectedForRemoval }) {
+                    _state.value = _state.value.copy(isOnDeletionState = false)
+                } else {
+                    _state.value = _state.value.copy(isOnDeletionState = true)
+                }
+            }
+            is ChatScreenEvent.OnDeleteMessages -> {
+               deleteMessages().invokeOnCompletion {
+                   getChatWithMessages()
+               }
+            }
+            is ChatScreenEvent.ResetOnDeleteState -> {
+                val resetSelected = _state.value.listOfMessages.map {
+                    if (it.isSelectedForRemoval) {
+                        it.copy(isSelectedForRemoval = false)
+                    } else {
+                        it
+                    }
+                }.toMutableList()
+                _state.value = _state.value.copy(listOfMessages = resetSelected)
+                onEvent(ChatScreenEvent.OnToggleDeleteState)
+            }
 
         }
     }
@@ -84,5 +120,21 @@ class ChatScreenViewModel @Inject constructor(
             }
         }
     }
+
+    private fun deleteMessages() =
+        viewModelScope.launch {
+            _state.value.listOfMessages
+                .filter { it.isSelectedForRemoval }
+                .forEach {
+                    repository.deleteMessage(it, _state.value.chatItem).collect{result ->
+                        if (!result) {
+                            _state.value = _state.value.copy(error = "Error: Fatal error deleting messages")
+                        } else {
+                            _state.value = _state.value.copy(isOnDeletionState = false)
+                        }
+                    }
+                }
+        }
+
 
 }

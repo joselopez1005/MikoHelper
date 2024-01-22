@@ -10,5 +10,6 @@ data class ChatScreenStates(
     val listOfMessages: MutableList<MessageItem> = mutableListOf(
         MessageItem(content = chatItem.personality, role = MessageItem.SYSTEM, sentAt = LocalDateTime.now())
     ),
+    val isOnDeletionState: Boolean = false,
     val error: String? = null
 )

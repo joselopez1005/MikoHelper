@@ -10,6 +10,5 @@ sealed class HomeScreenEvent {
     data class OnChatSelectedForRemoval(val chatItemWithMessageItem: ChatItemWithMessageItems): HomeScreenEvent()
     object OnToggleRemoveState: HomeScreenEvent()
     object OnRefresh: HomeScreenEvent()
-
     object OnDeleteChats: HomeScreenEvent()
 }
