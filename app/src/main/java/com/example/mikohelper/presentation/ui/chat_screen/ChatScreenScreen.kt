@@ -1,7 +1,12 @@
+@file:OptIn(ExperimentalFoundationApi::class)
+
 package com.example.mikohelper.presentation.ui.chat_screen
 
 import UserInputMessage
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -18,8 +23,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -27,6 +32,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -44,6 +50,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.mikohelper.domain.chat_items.MessageItem
 import com.example.mikohelper.domain.util.NavigationUtil
+import com.example.mikohelper.presentation.ui.chat_screen.ChatScreenEvent.GetChatMessages
+import com.example.mikohelper.presentation.ui.chat_screen.ChatScreenEvent.OnToggleDeleteState
 import com.example.mikohelper.presentation.ui.components.MikoHelperAppBar
 import com.example.mikohelper.presentation.ui.components.ProfileCard
 import com.example.mikohelper.presentation.ui.theme.MikoHelperTheme
@@ -56,7 +64,7 @@ fun ChatScreen(
     navController: NavController,
     viewModel: ChatScreenViewModel = hiltViewModel()
 ) {
-    viewModel.onEvent(ChatScreenEvent.GetChatMessages(chatItemId))
+    viewModel.onEvent(GetChatMessages(chatItemId))
     ChatScreenContent(
         viewModel.state,
         navController = navController,
@@ -76,28 +84,17 @@ fun ChatScreen(
 fun ChatScreenContent(
     state: State<ChatScreenStates>,
     navController: NavController,
-    onButtonPressed: (ChatScreenEvent) -> Unit
+    onEvent: (ChatScreenEvent) -> Unit
 ) {
     val scrollState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     Scaffold(
         topBar = {
-            MikoHelperAppBar(
-                title = {
-                    ProfileCard(
-                        recipientName = state.value.chatItem.recipientName,
-                        recipientPicture = state.value.chatItem.profilePictureRef
-                    )
-                },
-                actions = { Icon(imageVector = Icons.Outlined.Search, contentDescription = null) },
-                onNavIconPressed = {
-                    navController.previousBackStackEntry
-                        ?.savedStateHandle
-                        ?.set(NavigationUtil.Results.REFRESH_NEEDED, true)
-
-                    navController.popBackStack()
-                }
-            )
+            if (state.value.isOnDeletionState) {
+                MikoHelperDeleteAppBar(state = state, onEvent = onEvent)
+            } else {
+                MikoHelperSearchAppBar(state = state, navController = navController)
+            }
         },
         contentWindowInsets = ScaffoldDefaults
             .contentWindowInsets
@@ -114,13 +111,14 @@ fun ChatScreenContent(
             MessagesSection(
                 state = state,
                 scrollState = scrollState,
+                onEvent = onEvent,
                 modifier = Modifier
                     .weight(1f)
                     .padding(start = 8.dp, end = 8.dp)
             )
             UserInputMessage(
                 chatItem = state.value.chatItem,
-                sendButtonAction = onButtonPressed,
+                sendButtonAction = onEvent,
                 resetScroll = {
                     scope.launch {
                         scrollState.scrollToItem(0)
@@ -138,6 +136,7 @@ fun ChatScreenContent(
 @Composable
 fun MessagesSection(
     state: State<ChatScreenStates>,
+    onEvent: (ChatScreenEvent) -> Unit,
     scrollState: LazyListState,
     modifier: Modifier = Modifier,
 ) {
@@ -151,12 +150,16 @@ fun MessagesSection(
             if (it == 0) {
                 MessageBubble(
                     messageItem = listOfMessages[it],
+                    onEvent = onEvent,
+                    state = state,
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
                 return@items
             }
             MessageBubble(
                 messageItem = listOfMessages[it],
+                onEvent = onEvent,
+                state = state,
                 modifier = Modifier.padding(top = 8.dp)
             )
         }
@@ -168,6 +171,8 @@ fun MessagesSection(
 @Composable
 fun MessageBubble(
     messageItem: MessageItem,
+    onEvent: (ChatScreenEvent) -> Unit,
+    state: State<ChatScreenStates>,
     modifier: Modifier = Modifier
 ) {
     val chatBubbleShape: RoundedCornerShape
@@ -180,11 +185,13 @@ fun MessageBubble(
             chatBubbleShape = RoundedCornerShape(20.dp, 4.dp, 20.dp, 20.dp)
             messageAlignment = Alignment.TopEnd
         }
+
         MessageItem.ASSISTANT -> {
             backgroundBubbleColor = MaterialTheme.colorScheme.surfaceVariant
             chatBubbleShape = RoundedCornerShape(4.dp, 20.dp, 20.dp, 20.dp)
             messageAlignment = Alignment.TopStart
         }
+
         else -> {
             return
         }
@@ -193,20 +200,31 @@ fun MessageBubble(
     Box(
         modifier = modifier
             .fillMaxWidth()
+            .combinedClickable(
+                onClick = {
+                    if (state.value.isOnDeletionState) {
+                        onEvent(ChatScreenEvent.OnMessageSelectedForRemoval(messageItem))
+                    }
+                },
+                onLongClick = {
+                    onEvent(ChatScreenEvent.OnMessageSelectedForRemoval(messageItem))
+                    onEvent(OnToggleDeleteState)
+                }
+            )
     ) {
         Column(modifier = Modifier.align(messageAlignment)) {
             Surface(
-                color = backgroundBubbleColor,
+                color = if (messageItem.isSelectedForRemoval) MaterialTheme.colorScheme.inversePrimary else backgroundBubbleColor,
                 shape = chatBubbleShape
             ) {
-                ClickableMessage(message = messageItem.content, role = messageItem.role) {}
+                BubbleMessage(message = messageItem.content, role = messageItem.role) {}
             }
         }
     }
 }
 
 @Composable
-fun ClickableMessage(
+fun BubbleMessage(
     message: String,
     role: String,
     showTime: () -> Unit,
@@ -217,11 +235,62 @@ fun ClickableMessage(
     } else {
         MaterialTheme.colorScheme.onSurfaceVariant
     }
-    ClickableText(
+    Text(
         text = messageText,
         style = MaterialTheme.typography.bodyLarge.copy(color = textColor),
-        onClick = { showTime.invoke() },
         modifier = Modifier.padding(16.dp)
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MikoHelperSearchAppBar(
+    state: State<ChatScreenStates>,
+    navController: NavController
+) {
+    MikoHelperAppBar(
+        title = {
+            ProfileCard(
+                recipientName = state.value.chatItem.recipientName,
+                recipientPicture = state.value.chatItem.profilePictureRef
+            )
+        },
+        actions = { Icon(imageVector = Icons.Outlined.Search, contentDescription = null) },
+        onNavIconPressed = {
+            navController.previousBackStackEntry
+                ?.savedStateHandle
+                ?.set(NavigationUtil.Results.REFRESH_NEEDED, true)
+
+            navController.popBackStack()
+        }
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun MikoHelperDeleteAppBar(
+    state: State<ChatScreenStates>,
+    onEvent: (ChatScreenEvent) -> Unit
+) {
+    MikoHelperAppBar(
+        title = {
+            ProfileCard(
+                recipientName = state.value.chatItem.recipientName,
+                recipientPicture = state.value.chatItem.profilePictureRef
+            )
+        },
+        actions = {
+            Icon(
+                imageVector = Icons.Outlined.Delete,
+                contentDescription = null,
+                modifier = Modifier.clickable {
+                    onEvent.invoke(ChatScreenEvent.OnDeleteMessages)
+                }
+            )
+        },
+        onNavIconPressed = {
+            onEvent.invoke(ChatScreenEvent.ResetOnDeleteState)
+        }
     )
 }
 
@@ -234,7 +303,7 @@ fun ChatScreenPreview() {
         }
         ChatScreenContent(
             state = state,
-            onButtonPressed = {},
+            onEvent = {},
             navController = rememberNavController()
         )
     }
@@ -243,6 +312,10 @@ fun ChatScreenPreview() {
 @Preview(showBackground = true)
 @Composable
 fun MessageBubbleUserPreview() {
+    val state = remember {
+        mutableStateOf(ChatScreenStates())
+    }
+
     MikoHelperTheme {
         MessageBubble(
             messageItem = MessageItem(
@@ -250,7 +323,9 @@ fun MessageBubbleUserPreview() {
                 "Hello, how are you?",
                 "user",
                 LocalDateTime.now()
-            )
+            ),
+            onEvent = {},
+            state = state
         )
     }
 }
@@ -258,6 +333,9 @@ fun MessageBubbleUserPreview() {
 @Preview
 @Composable
 fun MessageBubbleUserPreviewDark() {
+    val state = remember {
+        mutableStateOf(ChatScreenStates())
+    }
     MikoHelperTheme(darkTheme = true) {
         MessageBubble(
             messageItem = MessageItem(
@@ -265,7 +343,9 @@ fun MessageBubbleUserPreviewDark() {
                 "Hello, how are you?",
                 "user",
                 LocalDateTime.now()
-            )
+            ),
+            onEvent = {},
+            state = state
         )
     }
 }
@@ -273,6 +353,9 @@ fun MessageBubbleUserPreviewDark() {
 @Preview
 @Composable
 fun MessageBubbleAssistantPreview() {
+    val state = remember {
+        mutableStateOf(ChatScreenStates())
+    }
     MikoHelperTheme {
         MessageBubble(
             messageItem = MessageItem(
@@ -280,7 +363,9 @@ fun MessageBubbleAssistantPreview() {
                 "Hello, how are you?",
                 "assistant",
                 LocalDateTime.now()
-            )
+            ),
+            onEvent = {},
+            state = state
         )
     }
 }
@@ -288,6 +373,9 @@ fun MessageBubbleAssistantPreview() {
 @Preview
 @Composable
 fun MessageBubbleUserAssistantDark() {
+    val state = remember {
+        mutableStateOf(ChatScreenStates())
+    }
     MikoHelperTheme(darkTheme = true) {
         MessageBubble(
             messageItem = MessageItem(
@@ -295,7 +383,9 @@ fun MessageBubbleUserAssistantDark() {
                 "Hello, how are you?",
                 "assistant",
                 LocalDateTime.now()
-            )
+            ),
+            onEvent = {},
+            state = state
         )
     }
 }

@@ -218,6 +218,7 @@ fun UserInputMessage(
                     )
                 }
             },
+            maxLines = 2,
             modifier = Modifier
                 .fillMaxWidth()
                 .onFocusChanged { state ->
