@@ -4,12 +4,19 @@ package com.example.mikohelper.presentation.ui.chat_screen
 
 import UserInputMessage
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,9 +26,12 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
@@ -34,16 +44,19 @@ import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.ParagraphStyle
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -55,6 +68,7 @@ import com.example.mikohelper.presentation.ui.chat_screen.ChatScreenEvent.OnTogg
 import com.example.mikohelper.presentation.ui.components.MikoHelperAppBar
 import com.example.mikohelper.presentation.ui.components.ProfileCard
 import com.example.mikohelper.presentation.ui.theme.MikoHelperTheme
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
@@ -107,7 +121,6 @@ fun ChatScreenContent(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-
             MessagesSection(
                 state = state,
                 scrollState = scrollState,
@@ -163,6 +176,11 @@ fun MessagesSection(
                 modifier = Modifier.padding(top = 8.dp)
             )
         }
+    }
+    if (state.value.isLoading) {
+        MessageBubbleLoading(
+            modifier = Modifier.padding(bottom = 8.dp, start = 8.dp)
+        )
     }
 
 
@@ -242,6 +260,26 @@ fun BubbleMessage(
     )
 }
 
+@Composable
+fun MessageBubbleLoading(
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+    ) {
+        Surface(
+            color = MaterialTheme.colorScheme.surfaceVariant,
+            shape = RoundedCornerShape(4.dp, 20.dp, 20.dp, 20.dp),
+            ) {
+            LoadingAnimation3(
+                circleSize = 12.dp,
+                circleColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(16.dp)
+            )
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MikoHelperSearchAppBar(
@@ -292,6 +330,75 @@ fun MikoHelperDeleteAppBar(
             onEvent.invoke(ChatScreenEvent.ResetOnDeleteState)
         }
     )
+}
+
+@Composable
+fun LoadingAnimation3(
+    circleColor: Color = Color(0xFF35898F),
+    circleSize: Dp = 36.dp,
+    animationDelay: Int = 400,
+    initialAlpha: Float = 0.3f,
+    modifier: Modifier = Modifier
+) {
+
+    // 3 circles
+    val circles = listOf(
+        remember {
+            Animatable(initialValue = initialAlpha)
+        },
+        remember {
+            Animatable(initialValue = initialAlpha)
+        },
+        remember {
+            Animatable(initialValue = initialAlpha)
+        }
+    )
+
+    circles.forEachIndexed { index, animatable ->
+
+        LaunchedEffect(Unit) {
+
+            // Use coroutine delay to sync animations
+            delay(timeMillis = (animationDelay / circles.size).toLong() * index)
+
+            animatable.animateTo(
+                targetValue = 1f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(
+                        durationMillis = animationDelay
+                    ),
+                    repeatMode = RepeatMode.Reverse
+                )
+            )
+        }
+    }
+
+    // container for circles
+    Row(
+        modifier = modifier
+        //.border(width = 2.dp, color = Color.Magenta)
+    ) {
+
+        // adding each circle
+        circles.forEachIndexed { index, animatable ->
+
+            // gap between the circles
+            if (index != 0) {
+                Spacer(modifier = Modifier.width(width = 6.dp))
+            }
+
+            Box(
+                modifier = Modifier
+                    .size(size = circleSize)
+                    .clip(shape = CircleShape)
+                    .background(
+                        color = circleColor
+                            .copy(alpha = animatable.value)
+                    )
+            ) {
+            }
+        }
+    }
 }
 
 @Preview

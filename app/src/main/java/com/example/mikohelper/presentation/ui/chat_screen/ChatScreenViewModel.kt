@@ -70,6 +70,7 @@ class ChatScreenViewModel @Inject constructor(
     }
 
     private fun onUserSendMessage(message: String, chat: ChatItem) = run {
+        _state.value = _state.value.copy(isLoading = true)
         val messageItem = MessageItem(
             content = message,
             role = MessageItem.USER,
@@ -82,9 +83,10 @@ class ChatScreenViewModel @Inject constructor(
                 chatItem = chat
             ).collect { result ->
                 if (result is Success) {
-                    addMessage(result.data!!)
+                    addMessage(result.data!!) // Also sets loading state to false
+                    _state.value = _state.value.copy(isLoading = false)
                 } else {
-                    _state.value = _state.value.copy(error = result.message)
+                    _state.value = _state.value.copy(error = result.message, isLoading = false)
                 }
             }
         }
