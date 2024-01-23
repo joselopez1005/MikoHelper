@@ -11,5 +11,6 @@ data class ChatScreenStates(
         MessageItem(content = chatItem.personality, role = MessageItem.SYSTEM, sentAt = LocalDateTime.now())
     ),
     val isOnDeletionState: Boolean = false,
+    val isLoading: Boolean = false,
     val error: String? = null
 )
