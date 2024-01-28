@@ -81,7 +81,9 @@ fun ChatScreen(
     navController: NavController,
     viewModel: ChatScreenViewModel = hiltViewModel()
 ) {
-    viewModel.onEvent(GetChatMessages(chatItemId))
+    LaunchedEffect(false) {
+        viewModel.onEvent(GetChatMessages(chatItemId))
+    }
     ChatScreenContent(
         viewModel.state,
         navController = navController,

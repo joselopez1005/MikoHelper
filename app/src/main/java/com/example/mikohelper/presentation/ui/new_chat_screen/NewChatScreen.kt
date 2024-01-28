@@ -116,16 +116,28 @@ fun NewChatScreenContent(
 }
 
 private fun String.mapPersonalityToBriefDescription(): String {
-    if (this == NewChatStates.Personalities.homelander) {
-        return "Selfish and Rude"
-    }
     if (this == NewChatStates.Personalities.helpfulAssitant) {
         return "Reliable, responsive, empathetic: your helpful assistant."
     }
     if (this == NewChatStates.Personalities.storyTeller) {
         return "Masterful storyteller, captivating hearts with tales."
     }
-    return "Helpful Assitant"
+    if (this == NewChatStates.Personalities.debater) {
+        return "Refining rhetoric, molding minds, crafting compelling speakers."
+    }
+    if (this == NewChatStates.Personalities.therapist) {
+        return "Compassionate guide, healing hearts, fostering growth, nurturing mental well-being."
+    }
+    if (this == NewChatStates.Personalities.socrat) {
+        return "Wise questioner, igniting dialogue, provoking critical thought, unraveling insights."
+    }
+    if (this == NewChatStates.Personalities.wikipedia) {
+        return "Condensing knowledge, distilling insights, simplifying information, facilitating quick understanding."
+    }
+    if (this == NewChatStates.Personalities.timeTraveler) {
+        return "Describing time traveler's experiences, recounting historical shifts, revealing nuanced perspectives, storytelling across eras."
+    }
+    return "Helpful Assistant"
 }
 
 @Composable

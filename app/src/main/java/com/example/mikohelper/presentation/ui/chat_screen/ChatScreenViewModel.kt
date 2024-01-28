@@ -24,6 +24,9 @@ class ChatScreenViewModel @Inject constructor(
     fun onEvent(event: ChatScreenEvent) {
         when (event) {
             is ChatScreenEvent.OnUserSendMessage -> {
+                if (event.message.isBlank()) {
+                    return
+                }
                 onUserSendMessage(event.message, event.chatItem)
             }
             is ChatScreenEvent.GetChatMessages -> {
