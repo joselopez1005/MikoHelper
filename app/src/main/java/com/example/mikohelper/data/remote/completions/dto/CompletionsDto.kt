@@ -1,24 +1,24 @@
 package com.example.mikohelper.data.remote.completions.dto
 
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
 
 data class CompletionsDto(
-    @SerializedName("created")
+    @Json(name = "created")
     val created: Long,
-    @SerializedName("choices")
+    @Json(name = "choices")
     val choices: List<ChoicesDto>
 )
 
 data class ChoicesDto(
-    @SerializedName("message")
-    val message: List<MessageDto>,
-    @SerializedName("finish_reason")
+    @Json(name = "message")
+    val message: MessageDto,
+    @Json(name = "finish_reason")
     val finishReason: String
 )
 
 data class MessageDto(
-    @SerializedName("role")
+    @Json(name = "role")
     val role: String,
-    @SerializedName("content")
+    @Json(name = "content")
     val content: String
 )
