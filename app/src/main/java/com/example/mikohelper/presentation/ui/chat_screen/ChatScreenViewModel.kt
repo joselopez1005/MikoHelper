@@ -65,7 +65,9 @@ class ChatScreenViewModel @Inject constructor(
                 _state.value = _state.value.copy(listOfMessages = resetSelected)
                 onEvent(ChatScreenEvent.OnToggleDeleteState)
             }
-
+            is ChatScreenEvent.DismissErrorDialog -> {
+                _state.value = _state.value.copy(error = null)
+            }
         }
     }
 
