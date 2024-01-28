@@ -10,4 +10,5 @@ sealed class ChatScreenEvent {
     object OnToggleDeleteState: ChatScreenEvent()
     object OnDeleteMessages: ChatScreenEvent()
     object ResetOnDeleteState: ChatScreenEvent()
+    object DismissErrorDialog: ChatScreenEvent()
 }

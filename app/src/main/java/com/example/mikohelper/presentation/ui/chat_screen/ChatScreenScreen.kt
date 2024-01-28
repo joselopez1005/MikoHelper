@@ -34,8 +34,10 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -43,6 +45,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -90,6 +93,38 @@ fun ChatScreen(
             ?.set(NavigationUtil.Results.REFRESH_NEEDED, true)
 
         navController.popBackStack()
+    }
+    if(!viewModel.state.value.error.isNullOrBlank()) {
+        val error = viewModel.state.value.error!!
+        AlertDialog(
+            icon = {
+                   Icon(
+                       imageVector = Icons.Filled.Info,
+                       contentDescription = null,
+                       tint = MaterialTheme.colorScheme.onSurfaceVariant
+                   )
+            },
+            title = {
+                    Text(
+                        text = "Something Went Wrong!",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+            },
+            text = {
+                Text(
+                    text = error,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            },
+            onDismissRequest = { viewModel.onEvent(ChatScreenEvent.DismissErrorDialog) },
+            confirmButton = {
+                TextButton(
+                    onClick = { viewModel.onEvent(ChatScreenEvent.DismissErrorDialog) },
+                ) {
+                    Text(text = "Ok")
+                }
+            }
+        )
     }
 }
 
